@@ -55,9 +55,9 @@
       "couleur": "#7ddc5a",
       "chapitres": [
         {
-          "id": "adn",
-          "titre": "Cellule, ADN et divisions",
-          "fichier": "adn.json"
+          "id": "micro",
+          "titre": "UAA 5 · Les micro-organismes et leur transmission",
+          "fichier": "micro.json"
         }
       ]
     },
