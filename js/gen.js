@@ -34,4 +34,37 @@ const GEN={
  echelle(){const s=pick([25000,50000,100000]),cm=R(2,8),km=cm*s/100000,S=x=>x.toLocaleString("fr-BE");
   return{t:"nombre",q:"Sur une carte au 1/"+S(s)+", "+cm+" cm représentent combien de km ?",a:km,e:cm+" cm × "+S(s)+" = "+S(cm*s)+" cm = "+fmt(km)+" km"}}
 };
+
+/* ---------- Chimie : données du cours ---------- */
+const SUP={"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","+":"⁺","-":"⁻"};
+const sup=t=>String(t).split("").map(c=>SUP[c]||c).join("");
+const ionF=(sym,q)=>sym+sup((Math.abs(q)>1?Math.abs(q):"")+(q>0?"+":"-"));
+// Z <= 20 : nom, symbole
+const ELZ=[null,["hydrogène","H"],["hélium","He"],["lithium","Li"],["béryllium","Be"],["bore","B"],["carbone","C"],["azote","N"],["oxygène","O"],["fluor","F"],["néon","Ne"],["sodium","Na"],["magnésium","Mg"],["aluminium","Al"],["silicium","Si"],["phosphore","P"],["soufre","S"],["chlore","Cl"],["argon","Ar"],["potassium","K"],["calcium","Ca"]];
+// tableau « Principaux éléments et leur symbole » (annexe du cours)
+const ELEMS=ELZ.slice(1).concat([["chrome","Cr"],["manganèse","Mn"],["fer","Fe"],["cobalt","Co"],["nickel","Ni"],["cuivre","Cu"],["zinc","Zn"],["arsenic","As"],["sélénium","Se"],["brome","Br"],["krypton","Kr"],["argent","Ag"],["étain","Sn"],["iode","I"],["xénon","Xe"],["baryum","Ba"],["platine","Pt"],["or","Au"],["mercure","Hg"],["plomb","Pb"],["bismuth","Bi"],["uranium","U"]]);
+const FAM=[["Ia","alcalins"],["IIa","alcalino-terreux"],["IIIa","terreux"],["IVa","carbonides"],["Va","azotides"],["VIa","sulfurides"],["VIIa","halogènes"],["VIIIa","gaz nobles"]];
+const VAL={Ia:1,IIa:2,IIIa:3,IVa:4,Va:3,VIa:2,VIIa:1};
+// éléments des familles a : [nom, symbole, Z, famille]
+const FA=[["lithium","Li",3,"Ia"],["sodium","Na",11,"Ia"],["potassium","K",19,"Ia"],["béryllium","Be",4,"IIa"],["magnésium","Mg",12,"IIa"],["calcium","Ca",20,"IIa"],["baryum","Ba",56,"IIa"],["bore","B",5,"IIIa"],["aluminium","Al",13,"IIIa"],["carbone","C",6,"IVa"],["silicium","Si",14,"IVa"],["azote","N",7,"Va"],["phosphore","P",15,"Va"],["oxygène","O",8,"VIa"],["soufre","S",16,"VIa"],["fluor","F",9,"VIIa"],["chlore","Cl",17,"VIIa"],["brome","Br",35,"VIIa"],["iode","I",53,"VIIa"]];
+const IONQ={Ia:1,IIa:2,IIIa:3,Va:-3,VIa:-2,VIIa:-1};
+// électronégativités utilisées au cours
+const CHI={H:2.1,Li:1.0,Be:1.5,B:2.0,C:2.5,N:3.0,O:3.5,F:4.0,Na:0.9,Mg:1.2,Al:1.5,Si:1.8,P:2.1,S:2.5,Cl:3.0,K:0.8,Ca:1.0,Br:2.8,I:2.5,Ba:0.9};
+function config(z){const sh=["K","L","M","N"],cap=[2,8,8,2];let r=[],n=z;for(let i=0;i<4&&n>0;i++){const k=Math.min(n,cap[i]);r.push(sh[i]+k);n-=k}return r.join(" ")}
+const de=n=>/^[aeiouéèhy]/i.test(n)?"de l'"+n:"du "+n;
+const fmtChi=x=>x.toFixed(1).replace(".",",");
+Object.assign(GEN,{
+ symbole(){const e=pick(ELEMS);return mkQcm("Quel est le symbole "+de(e[0])+" ?",e[1],shuffle(ELEMS.filter(x=>x!==e&&x[1][0]===e[1][0])).map(x=>x[1]).concat(shuffle(ELEMS).map(x=>x[1])),e[0]+" : "+e[1])},
+ element(){const e=pick(ELEMS);return mkQcm("Quel élément a pour symbole "+e[1]+" ?",e[0],shuffle(ELEMS.filter(x=>x!==e&&x[1][0]===e[1][0])).map(x=>x[0]).concat(shuffle(ELEMS).map(x=>x[0])),e[1]+" : "+e[0])},
+ configElec(){const z=R(3,20),e=ELZ[z];return mkQcm("Configuration électronique "+de(e[0])+" (Z = "+z+") ?",config(z),[config(z-1),config(Math.min(z+1,20)),config(Math.min(z+2,20)),config(Math.max(z-2,1))],"Z = "+z+" : "+z+" électrons répartis K (max 2), L (max 8), M... -> "+config(z))},
+ famille(){const f=pick(FAM);return Math.random()<0.5?mkQcm("Comment s'appelle la famille du groupe "+f[0]+" ?",f[1],FAM.map(x=>x[1]),f[0]+" : "+f[1]):mkQcm("À quel groupe correspond la famille des "+f[1]+" ?",f[0],FAM.map(x=>x[0]),f[1]+" : groupe "+f[0])},
+ valence(){const e=pick(FA.filter(x=>VAL[x[3]]));return{t:"nombre",q:"Quelle est la valence "+de(e[0])+" ("+e[1]+", famille "+e[3]+") ? (réponds par un nombre)",a:VAL[e[3]],e:"Famille "+e[3]+" : valence "+VAL[e[3]]+" (= nombre d'électrons célibataires)."}},
+ ion(){const e=pick(FA.filter(x=>IONQ[x[3]]!==undefined&&x[1]!=="B")),q=IONQ[e[3]],ok=ionF(e[1],q);
+  return mkQcm("Quel ion forme "+(e[0]==="azote"||/^[aeiouéh]/.test(e[0])?"l'":"le ")+e[0]+" ("+e[1]+", famille "+e[3]+") ?",ok,[ionF(e[1],-q),ionF(e[1],q>0?q+1:q-1),ionF(e[1],q>0?Math.max(1,q-1)+(q===1?1:0):q+1||-2),ionF(e[1],-(Math.abs(q)%3+1))],q>0?"Un métal de la famille "+e[3]+" perd "+q+" électron"+(q>1?"s":"")+" : "+ok:"Un non-métal de la famille "+e[3]+" capte "+(-q)+" électron"+(q<-1?"s":"")+" pour compléter son octet : "+ok)},
+ electronsIon(){const e=pick(FA.filter(x=>IONQ[x[3]]!==undefined&&x[1]!=="B")),q=IONQ[e[3]];return{t:"nombre",q:"Combien d'électrons possède l'ion "+ionF(e[1],q)+" ? ("+e[1]+" : Z = "+e[2]+")",a:e[2]-q,e:e[2]+" protons ; charge "+(q>0?"+":"")+q+" -> "+e[2]+(q>0?" - ":" + ")+Math.abs(q)+" = "+(e[2]-q)+" électrons."}},
+ celib(){const f=pick(FAM);const n={Ia:1,IIa:2,IIIa:3,IVa:4,Va:3,VIa:2,VIIa:1,VIIIa:0}[f[0]];return{t:"nombre",q:"Combien d'électrons célibataires possède, dans le modèle de Lewis, un atome de la famille "+f[0]+" ("+f[1]+") ?",a:n,e:"Ia:1, IIa:2, IIIa:3, IVa:4, Va:3, VIa:2, VIIa:1, VIIIa:0 (= valence)."}},
+ liaison(){const P=[["Na","Cl"],["K","Br"],["Mg","O"],["Ca","F"],["Na","Br"],["H","Cl"],["H","Br"],["H","O"],["H","N"],["C","O"],["C","H"],["H","S"],["P","Cl"],["C","S"],["Cl","Cl"],["O","O"],["N","N"],["H","H"],["Al","F"],["Li","F"],["C","Cl"],["S","O"],["Ba","O"]],p=pick(P),a=CHI[p[0]],b=CHI[p[1]],d=Math.round(Math.abs(a-b)*10)/10;
+  const t=d>=1.7?"ionique":d>0?"covalente polarisée":"covalente pure";
+  return mkQcm("Quel type de liaison entre "+p[0]+" (χ = "+fmtChi(a)+") et "+p[1]+" (χ = "+fmtChi(b)+") ?",t,["ionique","covalente polarisée","covalente pure"],"Δχ = "+fmtChi(d)+" : "+(d>=1.7?"Δχ ≥ 1,7 -> ionique":d>0?"0 < Δχ < 1,7 -> covalente polarisée":"Δχ = 0 -> covalente pure"))}
+});
 if(typeof module!=="undefined")module.exports={GEN,R,pick,shuffle,fmt,norm};

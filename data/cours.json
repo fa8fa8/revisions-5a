@@ -41,9 +41,22 @@
       "couleur": "#2fd3a0",
       "chapitres": [
         {
-          "id": "mole",
-          "titre": "La mole et la stœchiométrie",
-          "fichier": "mole.json"
+          "id": "rappels",
+          "titre": "1. Rappels : Bohr, tableau périodique, électronégativité",
+          "fichier": "rappels.json",
+          "vu": "2026-09-08"
+        },
+        {
+          "id": "liaisons",
+          "titre": "2. Les liaisons chimiques (ioniques et covalentes)",
+          "fichier": "liaisons.json",
+          "vu": "2026-09-29"
+        },
+        {
+          "id": "geometrie",
+          "titre": "3. Configuration spatiale et solubilité dans l'eau",
+          "fichier": "geometrie.json",
+          "vu": "2026-10-27"
         }
       ]
     },
