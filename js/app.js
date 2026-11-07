@@ -141,7 +141,7 @@ function renderHome(){
  h+='<div class="grid">';
  COURS.forEach(c=>{const chs=c.chapitres.filter(ch=>ch.q.length),m=chs.length?Math.round(chs.reduce((s,ch)=>s+mastery(ch),0)/chs.length):0;
   h+='<button class="pcard" style="--c:'+esc(c.couleur)+'" onclick="renderZone(\''+c.id+'\')"><div class="zone">'+esc(c.icone)+'</div><div class="pname">'+esc(c.zone)+'</div><div class="pmeta">'+esc(c.nom)+'<br>'+c.chapitres.length+' chapitre'+(c.chapitres.length>1?"s":"")+' · '+(c.exemple?'exemple':'niveau '+zoneLevel(c)+' · maîtrise '+m+' %')+'</div></button>'});
- h+='</div><div class="tools"><button class="btn sec" onclick="renderExam()">Mode examen</button><button class="btn sec" onclick="renderSave()">Sauvegarde</button></div>';
+ h+='</div><div class="tools"><button class="btn sec" onclick="renderCard()">🪪 Ma carte</button><button class="btn sec" onclick="renderExam()">Mode examen</button><button class="btn sec" onclick="renderGuide()">❓ Guide</button><button class="btn sec" onclick="renderSave()">Sauvegarde</button></div>';
  h+='<div class="note">Rien n\'est jamais bloqué : l\'entraînement libre reste ouvert sur tous les chapitres.</div>';
  go(h);
 }
@@ -197,18 +197,47 @@ function importCode(){
 }
 
 /* ---------- fiches récapitulatives ---------- */
-const rich=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
-function renderFiche(cid,chid,fromHome){
- const c=course(cid),ch=chap(cid,chid);
- let h='<button class="back" onclick="'+(fromHome?'renderHome()':'renderZone(\''+cid+'\')')+'">&lt;- Retour</button><div class="sub">'+esc(c.icone)+' '+esc(c.nom)+'</div><h1 class="fh">'+esc(ch.titre)+'</h1>';
- (ch.fiche||[]).forEach(sec=>{h+='<div class="card fiche" style="--c:'+esc(c.couleur)+'"><h3>'+esc(sec.t)+'</h3>';
+const rich=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\*(.+?)\*/g,"<i>$1</i>");
+function sectionsHtml(secs,col){let h="";(secs||[]).forEach(sec=>{h+='<div class="card fiche" style="--c:'+esc(col)+'"><h3>'+esc(sec.t)+'</h3>';
+  if(sec.p)h+=sec.p.map(x=>'<p>'+rich(x)+'</p>').join("");
   if(sec.l)h+='<ul>'+sec.l.map(x=>'<li>'+rich(x)+'</li>').join("")+'</ul>';
   if(sec.tab)h+='<div class="tw"><table>'+sec.tab.map((r,i)=>'<tr>'+r.map(x=>i?'<td>'+rich(x)+'</td>':'<th>'+rich(x)+'</th>').join("")+'</tr>').join("")+'</table></div>';
   if(sec.n)h+='<div class="sub small" style="margin-top:8px">'+rich(sec.n)+'</div>';
-  h+='</div>'});
+  h+='</div>'});return h}
+function renderFiche(cid,chid,fromHome){
+ const c=course(cid),ch=chap(cid,chid);
+ let h='<button class="back" onclick="'+(fromHome?'renderHome()':'renderZone(\''+cid+'\')')+'">&lt;- Retour</button><div class="sub">'+esc(c.icone)+' '+esc(c.nom)+'</div><h1 class="fh">'+esc(ch.titre)+'</h1>';
+ h+=sectionsHtml(ch.fiche,c.couleur);
  h+='<button class="btn" onclick="startTrain(\''+cid+'\',\''+chid+'\')">S\'entraîner sur ce chapitre</button>';
  go(h);
 }
+
+/* ---------- guide ---------- */
+let GUIDE=null;
+async function renderGuide(){
+ if(!GUIDE){try{GUIDE=await fetch("data/guide.json",{cache:"no-cache"}).then(r=>r.json())}catch(e){GUIDE={sections:[{t:"Guide indisponible",l:["Reconnecte-toi à Internet une fois pour le charger."]}]}}}
+ go('<button class="back" onclick="renderHome()">&lt;- L\'île</button><h1 class="fh">❓ Guide de l\'île</h1>'+sectionsHtml(GUIDE.sections,"#ffc857"));
+}
+
+/* ---------- carte d'explorateur ---------- */
+function stats(){const days=Object.keys(S.days).filter(d=>S.days[d]>=DAY_MIN).length,answers=Object.values(S.days).reduce((a,b)=>a+b,0),
+ mastered=Object.values(S.srs).filter(x=>x[0]>=3).length;return{days,answers,mastered,chests:Object.keys(S.chests).length,quests:Object.keys(S.qdone).length}}
+function renderCard(edit){
+ const r=rank(),st=stats(),it=ITEMS.filter(i=>S.xp>=i[0]),rc=realCourses(),ri=rankIdx();
+ const d=new Date().toLocaleDateString("fr-BE",{day:"numeric",month:"long",year:"numeric"});
+ let h='<button class="back" onclick="renderHome()">&lt;- L\'île</button>';
+ h+='<div class="excard"><div class="exhead">'+HERO+'<div><div class="sub small">Carte d\'explorateur</div><div class="exname">'+esc(S.pseudo||"Explorateur anonyme")+'</div><div class="exrank">'+esc(r.name)+' · rang '+(ri+1)+'/'+RANKS.length+'</div></div></div>';
+ h+='<div class="exstats"><div><b>'+S.xp.toLocaleString("fr-BE")+'</b><span>XP</span></div><div><b>'+st.days+'</b><span>jours d\'exploration</span></div><div><b>'+st.mastered+'</b><span>questions maîtrisées</span></div><div><b>'+st.quests+'</b><span>quête'+(st.quests>1?"s":"")+' accomplie'+(st.quests>1?"s":"")+'</span></div></div>';
+ h+='<div class="sub small" style="margin:12px 0 6px">Niveau des zones</div>';
+ rc.forEach(c=>{const l=zoneLevel(c);h+='<div class="exzone"><span>'+esc(c.icone)+' '+esc(c.nom)+'</span><div class="xpbar" style="flex:1"><i style="width:'+l*10+'%;background:'+esc(c.couleur)+'"></i></div><b>'+l+'</b></div>'});
+ h+='<div class="sub small" style="margin:12px 0 6px">Objets ('+it.length+'/'+ITEMS.length+')</div><div class="inv">'+ITEMS.map(i=>'<span class="'+(S.xp>=i[0]?"":"lock")+'">'+i[1]+'</span>').join("")+'</div>';
+ h+='<div class="exfoot">'+st.chests+' coffre'+(st.chests>1?"s":"")+' hebdo · '+esc(d)+'</div></div>';
+ if(edit)h+='<div class="card"><b>Ton pseudo</b><input id="pseudo" class="txt" maxlength="24" value="'+esc(S.pseudo||"")+'" placeholder="Pseudo (pas ton nom complet)"><button class="btn" onclick="savePseudo()">Enregistrer</button></div>';
+ else h+='<button class="btn sec" onclick="renderCard(true)">Changer de pseudo</button>';
+ h+='<div class="note">Fais une capture d\'écran pour partager ta carte. Le rang ne monte qu\'en révisant toutes les matières régulièrement.</div>';
+ go(h);
+}
+function savePseudo(){const v=(document.getElementById("pseudo").value||"").trim().slice(0,24);S.pseudo=v;save();renderCard()}
 
 /* ---------- sessions de questions ---------- */
 function inst(def){

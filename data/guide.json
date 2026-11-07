@@ -1,0 +1,157 @@
+{
+ "sections": [
+  {
+   "t": "1. Installer l'appli",
+   "p": [
+    "Installe l'île comme une application : elle aura son icône et marchera même hors ligne."
+   ],
+   "l": [
+    "**Android** : dans Chrome, menu ⋮ -> *Ajouter à l'écran d'accueil* (ou *Installer l'application*).",
+    "**iPhone** : dans Safari, bouton *Partager* -> *Sur l'écran d'accueil* -> *Ajouter*.",
+    "Ensuite, passe **toujours par l'icône** : sur iPhone, le navigateur et l'appli installée ne partagent pas ta progression."
+   ]
+  },
+  {
+   "t": "2. L'écran d'accueil",
+   "tab": [
+    [
+     "Élément",
+     "Ce qu'il montre"
+    ],
+    [
+     "Le personnage",
+     "ton rang, tes XP et tes objets"
+    ],
+    [
+     "Cette semaine",
+     "tes jours d'exploration (un jour compte à partir de 5 réponses)"
+    ],
+    [
+     "⚔️ Quête",
+     "un contrôle à venir : date, questions vues et maîtrisées, fiche"
+    ],
+    [
+     "Expédition du jour",
+     "la révision quotidienne"
+    ],
+    [
+     "Les zones",
+     "une zone par matière, avec son niveau et sa maîtrise"
+    ],
+    [
+     "🪪 Ma carte · ❓ Guide · Mode examen · Sauvegarde",
+     "en bas de l'écran"
+    ]
+   ]
+  },
+  {
+   "t": "3. Les façons de réviser",
+   "tab": [
+    [
+     "Mode",
+     "Ce que ça fait"
+    ],
+    [
+     "**Expédition du jour**",
+     "10 questions : tes rappels du jour + des nouvelles questions. Tu peux t'arrêter quand tu veux."
+    ],
+    [
+     "**Quête : S'entraîner**",
+     "10 questions du contrôle, d'abord celles jamais vues, puis les ratées. En enchaînant, toute la matière passe."
+    ],
+    [
+     "**Quête : Contrôle blanc**",
+     "20 questions au hasard sur la matière du contrôle, note sur 20."
+    ],
+    [
+     "**Niveaux**",
+     "le chapitre en niveaux de 8 questions ; 70 % pour débloquer le suivant."
+    ],
+    [
+     "**Gardien de la zone**",
+     "10 questions sur tout le chapitre, quand tous les niveaux sont réussis."
+    ],
+    [
+     "**Entraînement libre**",
+     "questions illimitées sur un chapitre, toujours ouvert."
+    ],
+    [
+     "**🎯 Quiz mixte**",
+     "20 questions sur tous les chapitres d'une matière, note sur 20."
+    ],
+    [
+     "**Mode examen**",
+     "20 questions sur les chapitres que tu coches."
+    ],
+    [
+     "**📄 Fiche récap**",
+     "le résumé du chapitre."
+    ]
+   ],
+   "n": "Rien n'est jamais bloqué : l'entraînement libre et les fiches restent toujours accessibles."
+  },
+  {
+   "t": "4. Les questions et les rappels",
+   "tab": [
+    [
+     "Type",
+     "Comment répondre"
+    ],
+    [
+     "QCM",
+     "touche la bonne réponse"
+    ],
+    [
+     "Vrai / faux",
+     "touche Vrai ou Faux"
+    ],
+    [
+     "Réponse courte",
+     "tape un mot (majuscules et accents ne comptent pas)"
+    ],
+    [
+     "Nombre",
+     "tape un nombre (virgule ou point)"
+    ],
+    [
+     "Question ouverte",
+     "réponds, affiche la réponse attendue, puis sois honnête : **Oui, tout** / **Pas complètement** / **Pas du tout**"
+    ]
+   ],
+   "l": [
+    "Une question réussie revient après **1, 3, 7, 14, 30 puis 60 jours** ; une ratée revient **le lendemain**.",
+    "Une question est **maîtrisée** à partir de la 3e réussite espacée.",
+    "Certaines questions de sciences sont **générées** : les valeurs changent à chaque fois."
+   ]
+  },
+  {
+   "t": "5. XP, rangs et objets",
+   "l": [
+    "**+10 XP** par bonne réponse (+15 face au Gardien).",
+    "**+3 XP** seulement si tu revois une question **avant sa date de rappel**.",
+    "Au-delà de **150 XP dans la même matière le même jour**, les gains baissent (moitié, puis un cinquième) : varie les matières !",
+    "**+100 XP** : coffre de la semaine (4 jours d'exploration).",
+    "**+150 XP** : quête accomplie (toutes les questions vues, 80 % réussies deux fois d'affilée)."
+   ],
+   "n": "Chaque zone a un **niveau de 0 à 10** (10 % de questions maîtrisées par niveau). À partir du rang Bâtisseur, il faut un niveau minimum **dans toutes les matières** pour monter : de 1 (Bâtisseur) à 8 (Gardien de l'île, 33 000 XP). Un rang atteint reste acquis."
+  },
+  {
+   "t": "6. Ma carte d'explorateur",
+   "l": [
+    "Accueil -> **🪪 Ma carte** : ton pseudo, ton rang, tes XP, tes jours d'exploration, tes questions maîtrisées, le niveau de chaque zone et tes objets.",
+    "Choisis un **pseudo** (pas ton nom complet) et fais une capture d'écran pour la partager."
+   ]
+  },
+  {
+   "t": "7. Sauvegarder ta progression",
+   "p": [
+    "Ta progression reste **uniquement sur ton téléphone**."
+   ],
+   "l": [
+    "Accueil -> **Sauvegarde** -> **Copier le code**, et garde-le (note, message à toi-même).",
+    "Sur un nouvel appareil : **Sauvegarde** -> colle le code dans **Importer** -> **Restaurer**.",
+    "Attention : l'import remplace la progression de l'appareil."
+   ]
+  }
+ ]
+}

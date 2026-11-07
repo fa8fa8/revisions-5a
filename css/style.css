@@ -88,3 +88,14 @@ textarea.draft{height:120px;font:15px/1.4 system-ui,sans-serif;margin:0 0 4px}
 .fiche th{background:#ffffff12}
 h1.fh{font-size:21px;margin-bottom:12px}
 .fiche-btn{border-color:var(--acc);color:var(--txt)}
+.fiche p{margin:0 0 8px;line-height:1.5;font-size:15px}
+.excard{background:linear-gradient(160deg,#155069,#0e3a4e 55%,#3d2f0e);border:2px solid var(--acc);border-radius:22px;padding:18px;margin:8px 0 14px;box-shadow:0 10px 30px -12px #000}
+.exhead{display:flex;gap:14px;align-items:center}
+.exname{font-size:22px;font-weight:700}
+.exrank{color:var(--acc);font-weight:700;margin-top:2px}
+.exstats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.exstats div{background:#ffffff10;border-radius:12px;padding:10px;display:flex;flex-direction:column}
+.exstats b{font-size:22px}.exstats span{font-size:12px;color:var(--mut)}
+.exzone{display:flex;align-items:center;gap:10px;font-size:14px;margin:6px 0}
+.exzone span{width:120px;flex:none}.exzone .xpbar{margin:0}
+.exfoot{margin-top:14px;font-size:12px;color:var(--mut);text-align:right}
