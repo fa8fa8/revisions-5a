@@ -1,4 +1,10 @@
 {
+ "fiche": [
+  {"t": "Les micro-organismes", "l": ["4 groupes : **bactéries, virus, champignons microscopiques, protozoaires** (unicellulaires eucaryotes).", "**Non pathogènes** : ne provoquent pas de maladie ; certains sont utiles (flore intestinale, levures du pain et de la bière, champignons des fromages).", "**Pathogènes** : provoquent des maladies quand les barrières naturelles sont franchies."]},
+  {"t": "Les voies de transmission", "tab": [["Voie", "Exemples"], ["Respiratoire (aérienne)", "éternuements, toux, postillons"], ["Cutanée", "se donner la main, piqûre, plaie, objet contaminé"], ["Digestive", "aliment ou eau contaminés"], ["Sanguine", "seringues usagées, sang contaminé"], ["Sexuelle", "rapport sexuel non protégé"]]},
+  {"t": "De la transmission à la maladie", "l": ["1. L'agent pathogène est **transmis** à l'organisme.", "2. **Infection** : prolifération des micro-organismes pathogènes dans l'organisme.", "Passage à la maladie selon : nombre d'agents pathogènes, **virulence**, **défenses immunitaires** de l'hôte, traitements disponibles."]},
+  {"t": "Les maladies des documents", "tab": [["Maladie", "Agent", "Transmission"], ["Tétanos", "bactérie (Clostridium tetani), neurotoxine", "plaie cutanée ; **non contagieux**"], ["Grippe", "virus (Influenza)", "respiratoire"], ["Choléra", "bactérie (Vibrio cholerae)", "digestive (eau, aliments souillés)"], ["Maladie du sommeil", "protozoaire (Trypanosoma)", "piqûre de la mouche tsé-tsé (vectorielle)"], ["Candidose (mycose)", "champignon (Candida albicans)", "prolifération de la flore habituelle"], ["SIDA", "virus (VIH)", "sexuelle, sanguine, mère-enfant"]]}
+ ],
  "questions": [
   {"n": 1, "type": "vf", "q": "Les bactéries, les virus, les champignons microscopiques et les protozoaires sont des micro-organismes.", "rep": true, "expl": "Ce sont les quatre grands groupes de micro-organismes (microbes) vus au cours."},
   {"n": 1, "type": "qcm", "q": "Les protozoaires sont...", "choix": ["des unicellulaires eucaryotes", "des virus", "des bactéries", "des champignons pluricellulaires"], "expl": "Protozoaire = être vivant unicellulaire eucaryote (avec un noyau), comme le trypanosome."},

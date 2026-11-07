@@ -79,3 +79,12 @@ input.txt:focus{border-color:var(--acc)}
 textarea.draft{height:120px;font:15px/1.4 system-ui,sans-serif;margin:0 0 4px}
 .vf3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .vf3 .ans{text-align:center;padding:13px 6px;font-size:14px}
+.fiche h3{margin:0 0 8px;font-size:16px;color:var(--c,var(--acc))}
+.fiche ul{margin:0;padding-left:18px;line-height:1.5;font-size:15px}
+.fiche li{margin-bottom:4px}
+.tw{overflow-x:auto;margin-top:6px}
+.fiche table{border-collapse:collapse;font-size:13.5px;width:100%}
+.fiche th,.fiche td{border:1px solid #ffffff22;padding:6px 7px;text-align:left;vertical-align:top}
+.fiche th{background:#ffffff12}
+h1.fh{font-size:21px;margin-bottom:12px}
+.fiche-btn{border-color:var(--acc);color:var(--txt)}

@@ -42,7 +42,7 @@ async function load(){
  QUESTS=await fetch("data/quetes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{quetes:[]}).then(d=>d.quetes||[]).catch(()=>[]);
  await Promise.all(COURS.flatMap(c=>c.chapitres.map(ch=>
   fetch("data/"+c.id+"/"+ch.fichier,{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()})
-   .then(d=>{ch.q=d.questions||[]}).catch(()=>{ch.q=[];ch.err=true}))));
+   .then(d=>{ch.q=d.questions||[];ch.fiche=d.fiche||null}).catch(()=>{ch.q=[];ch.err=true}))));
  COURS.forEach(c=>c.chapitres.forEach(ch=>{
   const seen={};
   ch.q.forEach(q=>{const base=q.gen?"gen:"+q.gen:String(q.q);seen[base]=(seen[base]||0)+1;
@@ -123,7 +123,8 @@ function renderHome(){
  activeQuests().forEach(qu=>{const m=questMastery(qu),n=questQs(qu).length,b=S.qbest[qu.id];
   h+='<div class="card quest"><div class="row"><b>⚔️ Quête : '+esc(qu.titre)+'</b></div><div class="sub small">'+esc(dateLabel(qu.date))+' ('+countdown(qu.days)+') · '+n+' questions</div>'+
    '<div class="row small" style="margin-top:8px"><span>Vues : '+questSeen(qu)[0]+'/'+n+' · maîtrisées : '+m+' %'+(S.qdone[qu.id]?" ✓":"")+'</span>'+(b!==undefined?'<span>Contrôle blanc : '+b+'/20</span>':"")+'</div><div class="xpbar"><i style="width:'+m+'%"></i></div>'+
-   '<div class="tools"><button class="btn" onclick="startQuest(\''+qu.id+'\',false)">S\'entraîner</button><button class="btn sec" onclick="startQuest(\''+qu.id+'\',true)">Contrôle blanc</button></div></div>'});
+   '<div class="tools"><button class="btn" onclick="startQuest(\''+qu.id+'\',false)">S\'entraîner</button><button class="btn sec" onclick="startQuest(\''+qu.id+'\',true)">Contrôle blanc</button></div>'+
+   qu.chapitres.map(k=>{const[cc,hh]=k.split("/"),co=course(cc),cp=co&&co.chapitres.find(x=>x.id===hh);return cp&&cp.fiche?'<button class="train fiche-btn" style="margin-top:8px" onclick="renderFiche(\''+cc+'\',\''+hh+'\',true)">📄 Fiche : '+esc(cp.titre)+'</button>':""}).join("")+'</div>'});
  h+='<button class="btn hero-btn" onclick="startExpedition()">Expédition du jour<small>'+(due?due+" rappel"+(due>1?"s":"")+" prêt"+(due>1?"s":"")+" + nouvelles questions":"Nouvelles questions")+' · '+EXP_SIZE+' questions, arrêt possible à tout moment</small></button>';
  h+='<div class="grid">';
  COURS.forEach(c=>{const chs=c.chapitres.filter(ch=>ch.q.length),m=chs.length?Math.round(chs.reduce((s,ch)=>s+mastery(ch),0)/chs.length):0;
@@ -147,7 +148,7 @@ function renderZone(cid){
    h+='<button class="lv'+(open?"":" locked")+'" '+(open?'onclick="startLevel(\''+c.id+'\',\''+ch.id+'\','+k+')"':"disabled")+'><b>'+(open?k+1:"🔒")+'</b>'+(open?starHtml(stars(b||0)):'<span class="stars off">-</span>')+'</button>'});
   const go_=levelOpen(c.id,ch.id,"G"),bg=S.best[lvlKey(c.id,ch.id,"G")];
   h+='<button class="lv boss'+(go_?"":" locked")+'" '+(go_?'onclick="startLevel(\''+c.id+'\',\''+ch.id+'\',\'G\')"':"disabled")+'><b>'+(go_?"Gardien":"🔒 Gardien")+'</b>'+(go_?starHtml(stars(bg||0)):"")+'</button></div>';
-  h+='<button class="train" onclick="startTrain(\''+c.id+'\',\''+ch.id+'\')">Entraînement libre (illimité)</button></div>'});
+  h+='<div class="tools"><button class="train" onclick="startTrain(\''+c.id+'\',\''+ch.id+'\')">Entraînement libre</button>'+(ch.fiche?'<button class="train fiche-btn" onclick="renderFiche(\''+c.id+'\',\''+ch.id+'\')">📄 Fiche récap</button>':'')+'</div></div>'});
  h+='<div class="note">Un niveau se débloque à '+PASS+' % au niveau précédent. Le Gardien apparaît quand tous les niveaux sont réussis.</div>';
  go(h);
 }
@@ -179,6 +180,20 @@ function importCode(){
  armed=null;
  try{if(!v.startsWith("ILE1:"))throw 0;const d=JSON.parse(decodeURIComponent(escape(atob(v.slice(5)))));if(typeof d.xp!=="number")throw 0;S=Object.assign(blank(),d);save();renderSave(["ok","Progression restaurée."])}
  catch(e){renderSave(["ko","Code invalide."])}
+}
+
+/* ---------- fiches récapitulatives ---------- */
+const rich=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+function renderFiche(cid,chid,fromHome){
+ const c=course(cid),ch=chap(cid,chid);
+ let h='<button class="back" onclick="'+(fromHome?'renderHome()':'renderZone(\''+cid+'\')')+'">&lt;- Retour</button><div class="sub">'+esc(c.icone)+' '+esc(c.nom)+'</div><h1 class="fh">'+esc(ch.titre)+'</h1>';
+ (ch.fiche||[]).forEach(sec=>{h+='<div class="card fiche" style="--c:'+esc(c.couleur)+'"><h3>'+esc(sec.t)+'</h3>';
+  if(sec.l)h+='<ul>'+sec.l.map(x=>'<li>'+rich(x)+'</li>').join("")+'</ul>';
+  if(sec.tab)h+='<div class="tw"><table>'+sec.tab.map((r,i)=>'<tr>'+r.map(x=>i?'<td>'+rich(x)+'</td>':'<th>'+rich(x)+'</th>').join("")+'</tr>').join("")+'</table></div>';
+  if(sec.n)h+='<div class="sub small" style="margin-top:8px">'+rich(sec.n)+'</div>';
+  h+='</div>'});
+ h+='<button class="btn" onclick="startTrain(\''+cid+'\',\''+chid+'\')">S\'entraîner sur ce chapitre</button>';
+ go(h);
 }
 
 /* ---------- sessions de questions ---------- */

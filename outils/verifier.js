@@ -17,6 +17,7 @@ for(const c of idx.cours||[]){
   if(chIds.has(ch.id))E(where+" : id de chapitre en double ("+ch.id+")");chIds.add(ch.id);
   if(ch.vu&&!/^\d{4}-\d{2}-\d{2}$/.test(ch.vu))E(where+" : « vu » doit être au format AAAA-MM-JJ");
   let d;try{d=JSON.parse(fs.readFileSync(path.join(root,c.id,ch.fichier),"utf8"))}catch(e){E(where+" : "+e.message);continue}
+  if(d.fiche){if(!Array.isArray(d.fiche))E(where+" : « fiche » doit être une liste");else d.fiche.forEach((s,i)=>{if(!s.t)E(where+" fiche §"+(i+1)+" : titre « t » manquant");if(!s.l&&!s.tab)E(where+" fiche §"+(i+1)+" : ni « l » ni « tab »")})}
   const qs=d.questions||[];if(!qs.length)W(where+" : aucune question");
   const seen=new Set();
   qs.forEach((q,i)=>{total++;const at=where+" #"+(i+1);

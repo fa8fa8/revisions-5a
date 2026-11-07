@@ -58,6 +58,19 @@ node outils/verifier.js
 
 Le script signale les fichiers JSON invalides, les champs manquants et les types inconnus.
 
+## Fiche récapitulative (facultatif)
+
+Dans le fichier du chapitre, à côté de `questions` :
+
+```json
+"fiche": [
+  {"t": "Titre de section", "l": ["point 1 avec **gras**", "point 2"]},
+  {"t": "Un tableau", "tab": [["En-tête 1", "En-tête 2"], ["case", "case"]], "n": "note sous le tableau"}
+]
+```
+
+Un bouton « 📄 Fiche récap » apparaît alors dans la zone et dans la quête du contrôle.
+
 ## Quêtes de contrôle
 
 Pour un contrôle annoncé, ajouter une entrée dans `data/quetes.json` :
