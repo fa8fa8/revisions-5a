@@ -72,7 +72,8 @@ Pour un contrôle annoncé, ajouter une entrée dans `data/quetes.json` :
 - `chapitres` : liste de `cours/chapitre`. Un contrôle peut couvrir plusieurs chapitres, même de cours différents.
 - La quête apparaît sur l'accueil jusqu'au jour du contrôle inclus, puis disparaît.
 - Deux boutons : « S'entraîner » (10 questions, les moins maîtrisées d'abord) et « Contrôle blanc » (20 questions, note sur 20).
-- La quête est accomplie (+150 XP) quand 80 % des questions ont été réussies deux fois d'affilée.
+- « S'entraîner » propose d'abord les questions jamais vues, puis les ratées : en enchaînant les séries, toute la matière passe.
+- La quête est accomplie (+150 XP) quand toutes les questions ont été vues et que 80 % ont été réussies deux fois d'affilée.
 - Dans les 7 jours avant le contrôle, l'expédition du jour pioche en priorité dans ces chapitres.
 
 ## Niveaux

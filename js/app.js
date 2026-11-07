@@ -79,11 +79,13 @@ const QUEST_GOAL=80; // % de questions réussies 2 fois d'affilée
 function activeQuests(){const t=today();return QUESTS.map(qu=>Object.assign({},qu,{days:dayOf(qu.date)-t})).filter(qu=>qu.days>=0).sort((a,b)=>a.days-b.days)}
 function questQs(qu){return qu.chapitres.flatMap(k=>{const[c,h]=k.split("/"),co=course(c),ch=co&&co.chapitres.find(x=>x.id===h);return ch?ch.q:[]})}
 function questMastery(qu){const qs=questQs(qu);return qs.length?Math.round(qs.filter(q=>(S.streak[q.id]||0)>=2).length/qs.length*100):0}
+function questSeen(qu){const qs=questQs(qu);return[qs.filter(q=>S.streak[q.id]!==undefined).length,qs.length]}
+function questReady(qu){const[v,n]=questSeen(qu);return v===n&&questMastery(qu)>=QUEST_GOAL}
 const dateLabel=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(Date.UTC(y,m-1,d)).toLocaleDateString("fr-BE",{weekday:"long",day:"numeric",month:"long",timeZone:"UTC"})};
 const countdown=n=>n===0?"aujourd'hui":n===1?"demain":"dans "+n+" jours";
 function startQuest(id,exam){const qu=QUESTS.find(x=>x.id===id),qs=questQs(qu);if(!qs.length)return;
  let queue;if(exam)queue=shuffle(qs).slice(0,20);
- else{const w=q=>S.streak[q.id]||0;queue=shuffle(shuffle(qs).sort((a,b)=>w(a)-w(b)).slice(0,10))}
+ else{const w=q=>S.streak[q.id]===undefined?-1:S.streak[q.id];queue=shuffle(shuffle(qs).sort((a,b)=>w(a)-w(b)).slice(0,10))}
  begin({mode:exam?"qexam":"quest",questId:id,title:exam?"Contrôle blanc":"Quête",queue})}
 
 /* ---------- progression : rangs, objets, semaine ---------- */
@@ -120,7 +122,7 @@ function renderHome(){
   (w.chest?"":'<div class="sub small">'+GOAL_WEEK+' jours d\'exploration ('+DAY_MIN+' réponses par jour) -> coffre de 100 XP</div>')+'</div>';
  activeQuests().forEach(qu=>{const m=questMastery(qu),n=questQs(qu).length,b=S.qbest[qu.id];
   h+='<div class="card quest"><div class="row"><b>⚔️ Quête : '+esc(qu.titre)+'</b></div><div class="sub small">'+esc(dateLabel(qu.date))+' ('+countdown(qu.days)+') · '+n+' questions</div>'+
-   '<div class="row small" style="margin-top:8px"><span>Prêt à '+m+' %'+(S.qdone[qu.id]?" · quête accomplie ✓":" · objectif "+QUEST_GOAL+" %")+'</span>'+(b!==undefined?'<span>Contrôle blanc : '+b+'/20</span>':"")+'</div><div class="xpbar"><i style="width:'+m+'%"></i></div>'+
+   '<div class="row small" style="margin-top:8px"><span>Vues : '+questSeen(qu)[0]+'/'+n+' · maîtrisées : '+m+' %'+(S.qdone[qu.id]?" ✓":"")+'</span>'+(b!==undefined?'<span>Contrôle blanc : '+b+'/20</span>':"")+'</div><div class="xpbar"><i style="width:'+m+'%"></i></div>'+
    '<div class="tools"><button class="btn" onclick="startQuest(\''+qu.id+'\',false)">S\'entraîner</button><button class="btn sec" onclick="startQuest(\''+qu.id+'\',true)">Contrôle blanc</button></div></div>'});
  h+='<button class="btn hero-btn" onclick="startExpedition()">Expédition du jour<small>'+(due?due+" rappel"+(due>1?"s":"")+" prêt"+(due>1?"s":"")+" + nouvelles questions":"Nouvelles questions")+' · '+EXP_SIZE+' questions, arrêt possible à tout moment</small></button>';
  h+='<div class="grid">';
@@ -220,7 +222,7 @@ function answer(g){
  S.streak[q.id]=ok?(S.streak[q.id]||0)+1:0;
  if(ok){sess.ok++;S.xp+=sess.gain;sess.xp+=sess.gain}
  else if((sess.mode==="exp"||sess.mode==="quest")&&!sess.again.has(q.id)){sess.again.add(q.id);sess.queue.push(sess.queue[sess.i])}
- activeQuests().forEach(qu=>{if(!S.qdone[qu.id]&&questMastery(qu)>=QUEST_GOAL){S.qdone[qu.id]=1;S.xp+=150;sess.questDone=qu.titre}});
+ activeQuests().forEach(qu=>{if(!S.qdone[qu.id]&&questReady(qu)){S.qdone[qu.id]=1;S.xp+=150;sess.questDone=qu.titre}});
  const t=today();S.days[t]=(S.days[t]||0)+1;
  const w=weekInfo();if(w.n>=GOAL_WEEK&&!S.chests[w.ws]){S.chests[w.ws]=1;S.xp+=100;sess.chest=true}
  save();renderQuiz();
@@ -241,7 +243,7 @@ function renderQuiz(){
  if(A){const ok=sess.okLast;
   h+='<div class="fb '+(ok?"ok":"ko")+'"><b>'+(ok?"Bien joué ! +"+sess.gain+" XP":"Pas tout à fait. Réponse : "+esc(shown(q)))+'</b><span class="ex">'+esc(q.e||"")+'</span>'+
    (ok?"":'<div class="sub small" style="margin-top:6px">Elle reviendra '+(sess.mode==="exp"||sess.mode==="quest"?"en fin de session et ":"")+'dans tes rappels.</div>')+'</div>';
-  if(sess.questDone){h+='<div class="fb ok"><b>Quête accomplie : '+esc(sess.questDone)+' ! +150 XP</b><span class="ex">Tu maîtrises '+QUEST_GOAL+' % des questions du contrôle.</span></div>';sess.questDone=null}
+  if(sess.questDone){h+='<div class="fb ok"><b>Quête accomplie : '+esc(sess.questDone)+' ! +150 XP</b><span class="ex">Toutes les questions du contrôle vues, et '+QUEST_GOAL+' % maîtrisées.</span></div>';sess.questDone=null}
   if(sess.chest){h+='<div class="fb ok"><b>Coffre de la semaine ouvert : +100 XP !</b></div>';sess.chestShown=true;sess.chest=false}
   const last=!sess.endless&&sess.i+1>=sess.queue.length;
   h+='<button class="btn" id="nx" onclick="nextQ()">'+(last?"Voir le résultat":"Suivant")+'</button>';
@@ -271,7 +273,7 @@ function finish(){
   if(s.mode==="qexam"){const note=Math.round(s.ok/s.done*20*2)/2;if(complete)S.qbest[s.questId]=Math.max(S.qbest[s.questId]||0,note);save();
    h+='<div class="sub">Contrôle blanc'+(complete?"":" (interrompu, non compté)")+'</div><div class="score">'+fmt(note)+' / 20</div><p>'+s.ok+' / '+s.done+' bonnes réponses · +'+s.xp+' XP</p>';}
   else h+='<div class="sub">'+label+(s.mode==="exp"&&complete?" terminée":"")+'</div><div class="score">'+s.ok+' / '+s.done+'</div><p>+'+s.xp+' XP</p>';
-  if(s.questId){const qu=activeQuests().find(x=>x.id===s.questId);if(qu)h+='<p class="sub">Prêt pour le contrôle à '+questMastery(qu)+' %</p><button class="btn" onclick="startQuest(\''+qu.id+'\','+(s.mode==="qexam")+')">'+(s.mode==="qexam"?"Refaire un contrôle blanc":"Continuer la quête")+'</button>'}
+  if(s.questId){const qu=activeQuests().find(x=>x.id===s.questId);if(qu)h+='<p class="sub">Questions vues : '+questSeen(qu).join(' / ')+' · maîtrisées : '+questMastery(qu)+' %</p><button class="btn" onclick="startQuest(\''+qu.id+'\','+(s.mode==="qexam")+')">'+(s.mode==="qexam"?"Refaire un contrôle blanc":"Continuer la quête")+'</button>'}
   if(s.mode==="exp"){const d=dueIds().length;h+='<p class="sub">'+(d?d+" rappel"+(d>1?"s":"")+" encore prêt"+(d>1?"s":"")+" aujourd'hui.":"Plus aucun rappel en attente aujourd'hui.")+'</p>'}
   if(s.mode==="exam")h+='<button class="btn" onclick="startExam()">Nouvel examen sur les mêmes chapitres</button>';
  }
