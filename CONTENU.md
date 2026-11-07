@@ -38,12 +38,13 @@ Tout le contenu est dans `data/`. Il n'y a jamais besoin de toucher au code pour
 | Champ | Rôle |
 |---|---|
 | `n` | Difficulté : 1 (bases), 2 (approfondi), 3 (difficile). Sert à ordonner les niveaux. |
-| `type` | `qcm`, `vf`, `nombre` ou `texte` |
+| `type` | `qcm`, `vf`, `nombre`, `texte` ou `ouverte` |
 | `q` | L'énoncé |
 | `choix` (qcm) | **La bonne réponse en premier.** L'appli mélange l'ordre à l'affichage. |
 | `rep` (vf) | `true` ou `false` |
 | `rep` (nombre) | Un nombre, avec un point décimal : `2.5`. L'élève peut taper `2,5`. Ajouter `"tol": 0.01` pour accepter un arrondi. |
 | `rep` (texte) | Liste des réponses acceptées : `["went"]`. Majuscules, accents et point final sont ignorés. |
+| `rep` (ouverte) | La réponse modèle, en texte. Ajouter `"points": ["...", "..."]` pour la liste des éléments attendus. L'élève lit sa réponse, puis indique s'il avait tout. |
 | `expl` | Explication affichée après la réponse. Fortement conseillée. |
 | `gen` | Question générée (valeurs aléatoires à chaque fois). Voir la liste dans `js/gen.js`. |
 

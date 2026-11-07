@@ -30,9 +30,10 @@ for(const c of idx.cours||[]){
     case"vf":if(typeof q.rep!=="boolean")E(at+" : « rep » doit être true ou false");break;
     case"nombre":if(typeof q.rep!=="number")E(at+" : « rep » doit être un nombre (avec un point : 2.5)");break;
     case"texte":if(!Array.isArray(q.rep)||!q.rep.length)E(at+" : « rep » doit être une liste de réponses acceptées");break;
+    case"ouverte":if(typeof q.rep!=="string"||!q.rep)E(at+" : « rep » doit être la réponse modèle (texte)");if(q.points&&!Array.isArray(q.points))E(at+" : « points » doit être une liste");break;
     default:E(at+" : type inconnu « "+q.type+" »");
    }
-   if(!q.expl)W(at+" : pas d'explication");
+   if(!q.expl&&q.type!=="ouverte")W(at+" : pas d'explication");
   });
  }
 }

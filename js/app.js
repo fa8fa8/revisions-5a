@@ -188,15 +188,17 @@ function inst(def){
  else{g={t:def.type,q:def.q,e:def.expl||""};
   if(def.type==="qcm"){const c=shuffle(def.choix);g.c=c;g.a=c.indexOf(def.choix[0])}
   else g.a=def.rep;
+  if(def.type==="ouverte")g.pts=def.points||[];
   if(def.tol)g.tol=def.tol}
  g.id=def.id;return g;
 }
 function begin(o){sess=Object.assign({i:0,ok:0,done:0,xp:0,xp0:S.xp,again:new Set(),gain:10},o);show()}
 function show(){
  if(sess.i>=sess.queue.length){if(sess.endless)sess.queue=sess.queue.concat(shuffle(sess.pool));else return finish()}
- sess.cur=inst(sess.queue[sess.i]);sess.answered=false;sess.given=null;renderQuiz();
+ sess.cur=inst(sess.queue[sess.i]);sess.answered=false;sess.given=null;sess.revealed=false;sess.draft="";renderQuiz();
 }
 function nextQ(){sess.i++;show()}
+function reveal(){const d=document.getElementById("draft");sess.draft=d?d.value:"";sess.revealed=true;renderQuiz()}
 
 function startExpedition(){const q=buildExpedition();if(!q.length)return;begin({mode:"exp",title:"Expédition du jour",queue:q})}
 function startLevel(cid,chid,k){const ch=chap(cid,chid);
@@ -207,6 +209,7 @@ function startExam(){const pool=[...examSel].flatMap(k=>{const[c,h]=k.split("/")
  begin({mode:"exam",title:"Examen",queue:shuffle(pool).slice(0,EXAM_SIZE)})}
 
 function check(q,g){
+ if(q.t==="ouverte")return g===true;
  if(q.t==="qcm"||q.t==="vf")return g===q.a;
  if(q.t==="nombre"){const x=parseFloat(String(g).replace(/\s/g,"").replace(",","."));return!isNaN(x)&&Math.abs(x-q.a)<=(q.tol||1e-6)}
  return[].concat(q.a).map(norm).includes(norm(g));
@@ -238,10 +241,15 @@ function renderQuiz(){
   h+='<button class="'+cl+'" onclick="answer('+i+')">'+esc(t)+'</button>'})}
  else if(q.t==="vf"){h+='<div class="vf">';[[true,"Vrai"],[false,"Faux"]].forEach(([v,t])=>{let cl="ans";if(A){if(v===q.a)cl+=" ok";else if(v===sess.given)cl+=" ko"}
   h+='<button class="'+cl+'" onclick="answer('+v+')">'+t+'</button>'});h+='</div>'}
+ else if(q.t==="ouverte"){
+  if(!sess.revealed)h+='<textarea id="draft" class="draft" placeholder="Réponds dans ta tête ou écris ta réponse ici (facultatif)">'+esc(sess.draft)+'</textarea><button class="btn" onclick="reveal()">Voir la réponse attendue</button>';
+  else{if(sess.draft.trim())h+='<div class="card"><b>Ta réponse</b><div class="sub" style="white-space:pre-wrap;margin-top:4px">'+esc(sess.draft)+'</div></div>';
+   h+='<div class="card model"><b>Réponse attendue</b><div style="margin-top:6px">'+esc(q.a)+'</div>'+(q.pts.length?'<div class="sub small" style="margin-top:10px">Éléments à citer :</div><ul>'+q.pts.map(p=>'<li>'+esc(p)+'</li>').join("")+'</ul>':"")+'</div>';
+   if(!A)h+='<div class="sub small">As-tu donné tous ces éléments ?</div><div class="vf"><button class="ans" onclick="answer(true)">Oui, tout</button><button class="ans" onclick="answer(false)">Pas complètement</button></div>'}}
  else{h+='<input id="in" class="txt" '+(q.t==="nombre"?'inputmode="decimal" ':"")+'autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse" '+(A?'disabled value="'+esc(sess.given)+'"':"")+'>';
   if(!A)h+='<button class="btn" onclick="answer()">Valider</button>'}
  if(A){const ok=sess.okLast;
-  h+='<div class="fb '+(ok?"ok":"ko")+'"><b>'+(ok?"Bien joué ! +"+sess.gain+" XP":"Pas tout à fait. Réponse : "+esc(shown(q)))+'</b><span class="ex">'+esc(q.e||"")+'</span>'+
+  h+='<div class="fb '+(ok?"ok":"ko")+'"><b>'+(ok?"Bien joué ! +"+sess.gain+" XP":q.t==="ouverte"?"À retravailler":"Pas tout à fait. Réponse : "+esc(shown(q)))+'</b><span class="ex">'+esc(q.e||"")+'</span>'+
    (ok?"":'<div class="sub small" style="margin-top:6px">Elle reviendra '+(sess.mode==="exp"||sess.mode==="quest"?"en fin de session et ":"")+'dans tes rappels.</div>')+'</div>';
   if(sess.questDone){h+='<div class="fb ok"><b>Quête accomplie : '+esc(sess.questDone)+' ! +150 XP</b><span class="ex">Toutes les questions du contrôle vues, et '+QUEST_GOAL+' % maîtrisées.</span></div>';sess.questDone=null}
   if(sess.chest){h+='<div class="fb ok"><b>Coffre de la semaine ouvert : +100 XP !</b></div>';sess.chestShown=true;sess.chest=false}
