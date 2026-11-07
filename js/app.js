@@ -137,6 +137,8 @@ function renderHome(){
 function renderZone(cid){
  const c=course(cid);
  let h='<button class="back" onclick="renderHome()">&lt;- L\'île</button><div class="center" style="--c:'+esc(c.couleur)+'"><div class="zone big">'+esc(c.icone)+'</div><h1>'+esc(c.zone)+'</h1><div class="sub">'+esc(c.nom)+'</div></div><div style="height:14px"></div>';
+ const nmix=c.chapitres.filter(ch=>isActive(ch)&&ch.q.length).length,bm=S.qbest["mix/"+c.id];
+ if(nmix>=2)h+='<button class="btn hero-btn" onclick="startMixed(\''+c.id+'\')">🎯 Quiz mixte<small>'+MIX_SIZE+' questions sur les '+nmix+' chapitres'+(bm!==undefined?' · meilleure note '+fmt(bm)+'/20':'')+'</small></button>';
  if(!c.chapitres.length)h+='<div class="card sub">Aucun chapitre pour l\'instant.</div>';
  c.chapitres.forEach(ch=>{
   h+='<div class="chap" style="--c:'+esc(c.couleur)+'"><h3>'+esc(ch.titre)+'</h3>';
@@ -220,6 +222,10 @@ function startLevel(cid,chid,k){const ch=chap(cid,chid);
  begin({mode:"level",cid,chid,k,title:k==="G"?"Gardien":"Niveau "+(k+1),color:course(cid).couleur,gain:k==="G"?15:10,
   queue:k==="G"?shuffle(ch.q).slice(0,10):shuffle(ch.levels[k])})}
 function startTrain(cid,chid){const ch=chap(cid,chid);begin({mode:"train",cid,chid,title:"Entraînement",color:course(cid).couleur,endless:true,pool:ch.q,queue:shuffle(ch.q)})}
+const MIX_SIZE=20;
+function startMixed(cid){const chs=shuffle(course(cid).chapitres.filter(ch=>isActive(ch)&&ch.q.length)).map(ch=>shuffle(ch.q));const q=[];
+ for(let i=0;q.length<MIX_SIZE&&chs.some(l=>l.length);i++){const l=chs[i%chs.length];if(l.length)q.push(l.pop())}
+ begin({mode:"mix",cid,title:"Quiz mixte",queue:shuffle(q)})}
 function startExam(){const pool=[...examSel].flatMap(k=>{const[c,h]=k.split("/");return chap(c,h).q});
  begin({mode:"exam",title:"Examen",queue:shuffle(pool).slice(0,EXAM_SIZE)})}
 
@@ -293,12 +299,13 @@ function finish(){
   else if(pct<PASS)h+='<div class="fb ko"><b>Encore un effort</b><span class="ex">'+PASS+' % pour débloquer la suite. Rejoue autant que tu veux : les erreurs reviendront dans tes rappels.</span></div>';
   h+='<button class="btn" onclick="startLevel(\''+s.cid+'\',\''+s.chid+'\','+(k==="G"?"'G'":k)+')">Rejouer</button>';
  }else{
-  const label={exp:"Expédition du jour",train:"Entraînement libre",exam:"Mode examen",quest:"Quête",qexam:"Contrôle blanc"}[s.mode];
-  if(s.mode==="qexam"){const note=Math.round(s.ok/s.done*20*2)/2;if(complete)S.qbest[s.questId]=Math.max(S.qbest[s.questId]||0,note);save();
-   h+='<div class="sub">Contrôle blanc'+(complete?"":" (interrompu, non compté)")+'</div><div class="score">'+fmt(note)+' / 20</div><p>'+s.ok+' / '+s.done+' bonnes réponses · +'+s.xp+' XP</p>';}
+  const label={exp:"Expédition du jour",train:"Entraînement libre",exam:"Mode examen",quest:"Quête",qexam:"Contrôle blanc",mix:"Quiz mixte"}[s.mode];
+  if(s.mode==="qexam"||s.mode==="mix"){const note=Math.round(s.ok/s.done*20*2)/2,bk=s.mode==="mix"?"mix/"+s.cid:s.questId;if(complete)S.qbest[bk]=Math.max(S.qbest[bk]||0,note);save();
+   h+='<div class="sub">'+(s.mode==="mix"?"Quiz mixte · "+esc(course(s.cid).nom):"Contrôle blanc")+(complete?"":" (interrompu, non compté)")+'</div><div class="score">'+fmt(note)+' / 20</div><p>'+s.ok+' / '+s.done+' bonnes réponses · +'+s.xp+' XP</p>';}
   else h+='<div class="sub">'+label+(s.mode==="exp"&&complete?" terminée":"")+'</div><div class="score">'+s.ok+' / '+s.done+'</div><p>+'+s.xp+' XP</p>';
   if(s.questId){const qu=activeQuests().find(x=>x.id===s.questId);if(qu)h+='<p class="sub">Questions vues : '+questSeen(qu).join(' / ')+' · maîtrisées : '+questMastery(qu)+' %</p><button class="btn" onclick="startQuest(\''+qu.id+'\','+(s.mode==="qexam")+')">'+(s.mode==="qexam"?"Refaire un contrôle blanc":"Continuer la quête")+'</button>'}
   if(s.mode==="exp"){const d=dueIds().length;h+='<p class="sub">'+(d?d+" rappel"+(d>1?"s":"")+" encore prêt"+(d>1?"s":"")+" aujourd'hui.":"Plus aucun rappel en attente aujourd'hui.")+'</p>'}
+  if(s.mode==="mix")h+='<button class="btn" onclick="startMixed(\''+s.cid+'\')">Nouveau quiz mixte</button>';
   if(s.mode==="exam")h+='<button class="btn" onclick="startExam()">Nouvel examen sur les mêmes chapitres</button>';
  }
  const w=weekInfo();h+='<p class="sub">Semaine : '+Math.min(w.n,GOAL_WEEK)+' / '+GOAL_WEEK+' jours d\'exploration</p>';
