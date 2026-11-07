@@ -15,7 +15,9 @@ const EXP_SIZE=10;      // questions par expédition du jour
 const EXAM_SIZE=20;     // questions en mode examen
 const LEVEL_SIZE=8;     // questions par niveau
 const PASS=70;          // % pour débloquer la suite
-const INT=[0,1,3,7,14,30,60]; // répétition espacée : jours avant le rappel, par boîte
+const INT=[0,1,3,7,14,30,60,90,180]; // répétition espacée : jours avant le rappel, par boîte
+const EXP_LONG=20;      // expédition longue
+const DUE_SHARE=0.6;    // part de rappels dans une expédition
 // Rangs : [XP, nom, niveau minimum exigé dans chaque matière réelle]
 const RANKS=[[0,"Naufragé",0],[100,"Survivant",0],[250,"Explorateur",0],[450,"Éclaireur",0],[700,"Aventurier",0],[1000,"Pisteur",0],[1400,"Grimpeur",0],[1900,"Navigateur",0],[2500,"Bâtisseur",1],[3300,"Cartographe",1],[4300,"Chasseur de trésors",2],[5500,"Capitaine",2],[7000,"Gardien du phare",3],[9000,"Sage du village",3],[11500,"Chef d'expédition",4],[14500,"Maître de l'île",4],[18000,"Héros de l'île",5],[22000,"Légende de l'île",6],[27000,"Mythe de l'île",7],[33000,"Gardien de l'île",8]];
 const ITEMS=[[0,"🎒","Sac à dos"],[250,"🔦","Lampe torche"],[700,"🧭","Boussole"],[1400,"🔭","Longue-vue"],[2500,"⛺","Campement"],[4300,"🛶","Canoë"],[7000,"🗝️","Clé ancienne"],[11500,"📜","Carte au trésor"],[18000,"⛵","Voilier"],[27000,"👑","Couronne"],[33000,"💎","Trésor de l'île"]];
@@ -64,19 +66,28 @@ function srsUpdate(id,ok){const t=today(),cur=S.srs[id];if(ok&&cur&&cur[1]>t)ret
 const dueIds=()=>{const t=today();return Object.keys(S.srs).filter(id=>QIDX[id]&&isActive(QIDX[id].ch)&&S.srs[id][1]<=t)};
 const mastery=ch=>ch.q.length?Math.round(ch.q.filter(q=>(S.srs[q.id]||[0])[0]>=3).length/ch.q.length*100):0;
 
-function buildExpedition(){
- const due=dueIds().sort((a,b)=>S.srs[a][1]-S.srs[b][1]).slice(0,Math.ceil(EXP_SIZE*0.6)).map(id=>QIDX[id].q);
+// Rappels classés par priorité : chapitres d'une quête proche, puis questions fragiles (boîte basse), puis les plus en retard
+function questChaps(){return new Set(activeQuests().filter(qu=>qu.days<=7).flatMap(qu=>qu.chapitres))}
+function dueSorted(){const qch=questChaps(),t=today();
+ const key=id=>{const m=QIDX[id],b=S.srs[id][0];return(qch.has(m.c.id+"/"+m.ch.id)?0:1)*1e6+b*1e4-Math.min(9999,t-S.srs[id][1])};
+ return dueIds().sort((a,b)=>key(a)-key(b))}
+const prioDue=size=>Math.min(dueIds().length,Math.ceil((size||EXP_SIZE)*DUE_SHARE));
+function buildExpedition(size){
+ size=size||EXP_SIZE;
+ const due=dueSorted().slice(0,Math.ceil(size*DUE_SHARE)).map(id=>QIDX[id].q);
  const picked=new Set(due.map(q=>q.id));
- const qch=new Set(activeQuests().filter(qu=>qu.days<=7).flatMap(qu=>qu.chapitres));
+ const qch=questChaps();
  const prio=ch=>qch.has(QIDX[ch.q[0].id].c.id+"/"+ch.id)?1e6:(ch.vu?dayOf(ch.vu):0);
  const chs=shuffle(activeChaps()).sort((a,b)=>prio(b)-prio(a));
- const fresh=[];
- for(const ch of chs){if(due.length+fresh.length>=EXP_SIZE)break;
-  shuffle(ch.q.filter(q=>!S.srs[q.id]&&!picked.has(q.id))).slice(0,prio(ch)>=1e6?5:3).forEach(q=>{if(due.length+fresh.length<EXP_SIZE){fresh.push(q);picked.add(q.id)}})}
+ const per=size>EXP_SIZE?2:1,fresh=[];
+ for(const ch of chs){if(due.length+fresh.length>=size)break;
+  shuffle(ch.q.filter(q=>!S.srs[q.id]&&!picked.has(q.id))).slice(0,(prio(ch)>=1e6?5:3)*per).forEach(q=>{if(due.length+fresh.length<size){fresh.push(q);picked.add(q.id)}})}
  let all=due.concat(fresh);
- if(all.length<EXP_SIZE){const rest=shuffle(chs.flatMap(ch=>ch.q).filter(q=>!picked.has(q.id)));all=all.concat(rest.slice(0,EXP_SIZE-all.length))}
+ if(all.length<size){const more=dueSorted().filter(id=>!picked.has(id)).map(id=>QIDX[id].q);all=all.concat(more.slice(0,size-all.length));more.forEach(q=>picked.add(q.id))}
+ if(all.length<size){const rest=shuffle(chs.flatMap(ch=>ch.q).filter(q=>!picked.has(q.id)));all=all.concat(rest.slice(0,size-all.length))}
  return shuffle(all);
 }
+
 
 /* ---------- quêtes de contrôle ---------- */
 const QUEST_GOAL=80; // % de questions réussies 2 fois d'affilée
@@ -124,7 +135,7 @@ function go(h){app.innerHTML=h;window.scrollTo(0,0)}
 
 function renderHome(){
  sess=null;armed=null;
- const r=rank(),w=weekInfo(),due=dueIds().length,L="LMMJVSD";
+ const r=rank(),w=weekInfo(),due=prioDue(),L="LMMJVSD";
  let h='<h1>L\'Île aux Révisions</h1><div class="sub">Explore l\'île, un cours par zone</div>';
  h+='<div class="hero">'+HERO+'<div style="flex:1"><div class="rank">'+esc(r.name)+' · '+S.xp+' XP</div><div class="xpbar"><i style="width:'+r.pct+'%"></i></div>'+
   '<div class="sub small">'+(r.next?(r.blocked?"Rang "+esc(r.next)+" : il faut le niveau "+r.need+" dans toutes les matières ("+esc(r.blocked.c?r.blocked.c.nom:"")+" : niveau "+r.blocked.lvl+")":r.left+" XP avant le rang "+esc(r.next)):"Rang maximum")+'</div>'+
@@ -138,7 +149,7 @@ function renderHome(){
    '<div class="tools"><button class="btn" onclick="startQuest(\''+qu.id+'\',false)">S\'entraîner</button><button class="btn sec" onclick="startQuest(\''+qu.id+'\',true)">Contrôle blanc</button></div>'+
    qu.chapitres.map(k=>{const[cc,hh]=k.split("/"),co=course(cc),cp=co&&co.chapitres.find(x=>x.id===hh);return cp&&cp.fiche?'<button class="train fiche-btn" style="margin-top:8px" onclick="renderFiche(\''+cc+'\',\''+hh+'\',true)">📄 Fiche : '+esc(cp.titre)+'</button>':""}).join("")+'</div>'});
  {const lb=S.lastBackup,ago=lb!=null?today()-lb:null;if(S.xp>=50&&(lb==null||ago>=7))h+='<button class="card backup" onclick="renderSave()">💾 <b>Pense à sauvegarder</b><span class="sub small">'+(lb==null?"Aucune sauvegarde envoyée pour l\'instant":"Dernière sauvegarde il y a "+ago+" jours")+' : envoie-la hors de ton téléphone.</span></button>'}
- h+='<button class="btn hero-btn" onclick="startExpedition()">Expédition du jour<small>'+(due?due+" rappel"+(due>1?"s":"")+" prêt"+(due>1?"s":"")+" + nouvelles questions":"Nouvelles questions")+' · '+EXP_SIZE+' questions, arrêt possible à tout moment</small></button>';
+ h+='<button class="btn hero-btn" onclick="startExpedition()">Expédition du jour<small>'+(due?due+" rappel"+(due>1?"s":"")+" prioritaire"+(due>1?"s":"")+" + nouvelles questions":"Nouvelles questions")+' · '+EXP_SIZE+' questions, arrêt possible à tout moment</small></button>'+(dueIds().length>prioDue()?'<button class="train" style="margin:-8px 0 16px" onclick="startExpedition(true)">Envie d\'en faire plus ? Expédition longue ('+EXP_LONG+' questions)</button>':'');
  h+='<div class="grid">';
  COURS.forEach(c=>{const chs=c.chapitres.filter(ch=>ch.q.length),m=chs.length?Math.round(chs.reduce((s,ch)=>s+mastery(ch),0)/chs.length):0;
   h+='<button class="pcard" style="--c:'+esc(c.couleur)+'" onclick="renderZone(\''+c.id+'\')"><div class="zone">'+esc(c.icone)+'</div><div class="pname">'+esc(c.zone)+'</div><div class="pmeta">'+esc(c.nom)+'<br>'+c.chapitres.length+' chapitre'+(c.chapitres.length>1?"s":"")+' · '+(c.exemple?'exemple':'niveau '+zoneLevel(c)+' · maîtrise '+m+' %')+'</div></button>'});
@@ -183,13 +194,21 @@ function toggleExam(k,on){if(on)examSel.add(k);else examSel.delete(k);const b=do
 
 /* ---------- sauvegarde ---------- */
 function exportCode(){return"ILE1:"+btoa(unescape(encodeURIComponent(JSON.stringify(S))))}
-async function packState(){const json=JSON.stringify(S);
- if(window.CompressionStream){try{const cs=new Blob([json]).stream().pipeThrough(new CompressionStream("gzip"));const u=new Uint8Array(await new Response(cs).arrayBuffer());let b="";for(let i=0;i<u.length;i+=0x8000)b+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return"ILE2:"+btoa(b)}catch(e){}}
+// Format compact : srs + streak regroupés par chapitre, dates relatives
+function compact(st){const o=Object.assign({},st),base=today(),q={};delete o.srs;delete o.streak;
+ const ids=new Set(Object.keys(st.srs||{}).concat(Object.keys(st.streak||{})));
+ ids.forEach(id=>{const k=id.lastIndexOf("/"),pre=id.slice(0,k),suf=id.slice(k+1),sr=(st.srs||{})[id];(q[pre]=q[pre]||{})[suf]=sr?[sr[0],sr[1]-base,(st.streak||{})[id]||0]:[-1,0,(st.streak||{})[id]||0]});
+ o.q=q;o.base=base;return o}
+function expand(o){if(!o.q)return o;const st=Object.assign({},o),srs={},streak={};delete st.q;delete st.base;
+ for(const pre in o.q)for(const suf in o.q[pre]){const id=pre+"/"+suf,[b,d,k]=o.q[pre][suf];if(b>=0)srs[id]=[b,d+o.base];if(k)streak[id]=k}
+ st.srs=srs;st.streak=streak;return st}
+async function packState(){const json=JSON.stringify(compact(S));
+ if(window.CompressionStream){try{const cs=new Blob([json]).stream().pipeThrough(new CompressionStream("gzip"));const u=new Uint8Array(await new Response(cs).arrayBuffer());let b="";for(let i=0;i<u.length;i+=0x8000)b+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return"ILE3:"+btoa(b)}catch(e){}}
  return exportCode()}
 async function unpackState(v){v=String(v).replace(/\s+/g,"");
  if(v.startsWith("ILE1:"))return JSON.parse(decodeURIComponent(escape(atob(v.slice(5)))));
- if(v.startsWith("ILE2:")){const b=atob(v.slice(5)),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
-  const ds=new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"));return JSON.parse(await new Response(ds).text())}
+ if(v.startsWith("ILE2:")||v.startsWith("ILE3:")){const b=atob(v.slice(5)),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
+  const ds=new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"));return expand(JSON.parse(await new Response(ds).text()))}
  throw 0}
 const isoDay=d=>new Date(d*864e5).toISOString().slice(0,10);
 function markBackup(){S.lastBackup=today();save()}
@@ -202,7 +221,7 @@ async function renderSave(msg){
   '<div class="sub small">Dernière sauvegarde : '+(lb==null?"jamais":ago===0?"aujourd'hui":"il y a "+ago+" jour"+(ago>1?"s":""))+'</div>'+
   '<button class="btn" onclick="shareBackup()">📤 Envoyer ma sauvegarde</button><div class="tools"><button class="btn sec" onclick="downloadBackup()">⬇️ Fichier</button><button class="btn sec" onclick="copyCode()">📋 Copier le code</button></div><textarea id="exp" readonly>'+esc(BK)+'</textarea></div>';
  h+='<div class="card"><b>Restaurer</b><div class="sub small">Choisis le fichier de sauvegarde ou colle le code. Attention : ça remplace la progression de ce téléphone.</div>'+
-  '<input type="file" id="impf" accept=".txt,text/plain" class="filein" onchange="loadBackupFile(this)"><textarea id="imp" placeholder="ILE2:..."></textarea><button class="btn sec" onclick="importCode()">'+(armed==="imp"?"Confirmer le remplacement ?":"Restaurer")+'</button></div>';
+  '<input type="file" id="impf" accept=".txt,text/plain" class="filein" onchange="loadBackupFile(this)"><textarea id="imp" placeholder="ILE3:..."></textarea><button class="btn sec" onclick="importCode()">'+(armed==="imp"?"Confirmer le remplacement ?":"Restaurer")+'</button></div>';
  go(h);
 }
 async function shareBackup(){
@@ -289,7 +308,7 @@ function show(){
 function nextQ(){sess.i++;show()}
 function reveal(){const d=document.getElementById("draft");sess.draft=d?d.value:"";sess.revealed=true;renderQuiz()}
 
-function startExpedition(){const q=buildExpedition();if(!q.length)return;begin({mode:"exp",title:"Expédition du jour",queue:q})}
+function startExpedition(long){const q=buildExpedition(long?EXP_LONG:EXP_SIZE);if(!q.length)return;begin({mode:"exp",title:long?"Expédition longue":"Expédition du jour",queue:q})}
 function startLevel(cid,chid,k){const ch=chap(cid,chid);
  begin({mode:"level",cid,chid,k,title:k==="G"?"Gardien":"Niveau "+(k+1),color:course(cid).couleur,gain:k==="G"?15:10,
   queue:k==="G"?shuffle(ch.q).slice(0,10):shuffle(ch.levels[k])})}
@@ -378,7 +397,7 @@ function finish(){
    h+='<div class="sub">'+(s.mode==="mix"?"Quiz mixte · "+esc(course(s.cid).nom):"Contrôle blanc")+(complete?"":" (interrompu, non compté)")+'</div><div class="score">'+fmt(note)+' / 20</div><p>'+s.ok+' / '+s.done+' bonnes réponses · +'+s.xp+' XP</p>';}
   else h+='<div class="sub">'+label+(s.mode==="exp"&&complete?" terminée":"")+'</div><div class="score">'+s.ok+' / '+s.done+'</div><p>+'+s.xp+' XP</p>';
   if(s.questId){const qu=activeQuests().find(x=>x.id===s.questId);if(qu)h+='<p class="sub">Questions vues : '+questSeen(qu).join(' / ')+' · maîtrisées : '+questMastery(qu)+' %</p><button class="btn" onclick="startQuest(\''+qu.id+'\','+(s.mode==="qexam")+')">'+(s.mode==="qexam"?"Refaire un contrôle blanc":"Continuer la quête")+'</button>'}
-  if(s.mode==="exp"){const d=dueIds().length;h+='<p class="sub">'+(d?d+" rappel"+(d>1?"s":"")+" encore prêt"+(d>1?"s":"")+" aujourd'hui.":"Plus aucun rappel en attente aujourd'hui.")+'</p>'}
+  if(s.mode==="exp"){const d=dueIds().length;h+='<p class="sub">'+(d?"Encore des rappels en réserve : une expédition longue t\'attend si tu en veux plus.":"Plus aucun rappel en attente aujourd'hui.")+'</p>'+(d?'<button class="btn sec" onclick="startExpedition(true)">Expédition longue ('+EXP_LONG+' questions)</button>':'')}
   if(s.mode==="mix")h+='<button class="btn" onclick="startMixed(\''+s.cid+'\')">Nouveau quiz mixte</button>';
   if(s.mode==="exam")h+='<button class="btn" onclick="startExam()">Nouvel examen sur les mêmes chapitres</button>';
  }

@@ -53,7 +53,7 @@
     ],
     [
      "**Expédition du jour**",
-     "10 questions : tes rappels du jour + des nouvelles questions. Tu peux t'arrêter quand tu veux."
+     "10 questions : tes **rappels prioritaires** du jour + des nouvelles questions. Tu peux t'arrêter quand tu veux. Envie d'en faire plus ? **Expédition longue** (20 questions)."
     ],
     [
      "**Quête : S'entraîner**",
@@ -119,9 +119,10 @@
     ]
    ],
    "l": [
-    "Une question réussie revient après **1, 3, 7, 14, 30 puis 60 jours** ; une ratée revient **le lendemain**.",
+    "Une question réussie revient après **1, 3, 7, 14, 30, 60, 90 puis 180 jours** ; une ratée revient **le lendemain**.",
     "Une question est **en cours** dès ta première bonne réponse, et **maîtrisée** à partir de la 3e réussite espacée (au plus tôt après 4 jours) : la réussir 10 fois le même soir ne la fait pas avancer plus vite.",
-    "Certaines questions de sciences sont **générées** : les valeurs changent à chaque fois."
+    "Certaines questions de sciences sont **générées** : les valeurs changent à chaque fois.",
+    "Les **rappels prioritaires** passent en premier : la matière d'un contrôle proche, puis les questions fragiles, puis les plus en retard. Les questions solides peuvent attendre sans pénalité."
    ]
   },
   {
@@ -148,7 +149,7 @@
     "Ta progression est **uniquement sur ton téléphone**. Si tu le perds ou si le cache est vidé, tout disparaît... sauf si tu as envoyé ta sauvegarde ailleurs."
    ],
    "l": [
-    "Accueil -> **Sauvegarde** -> **📤 Envoyer ma sauvegarde** : envoie le fichier par mail, WhatsApp ou Drive, **à toi-même ou à un parent**.",
+    "Accueil -> **Sauvegarde** -> **📤 Envoyer ma sauvegarde** : envoie le **fichier** par mail, WhatsApp ou Drive, **à toi-même ou à un parent** (plutôt le fichier que le copier-coller du code).",
     "Fais-le au moins **une fois par semaine** : l'accueil te le rappelle si ta dernière sauvegarde date de plus de 7 jours.",
     "Sur un nouveau téléphone : **Sauvegarde** -> **Restaurer** -> choisis le fichier (ou colle le code) -> confirme.",
     "Attention : restaurer remplace la progression du téléphone."
