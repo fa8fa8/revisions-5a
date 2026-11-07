@@ -157,7 +157,8 @@ function renderZone(cid){
   if(ch.err){h+='<div class="sub">Fichier introuvable ou invalide : data/'+esc(c.id)+'/'+esc(ch.fichier)+'</div></div>';return}
   if(!isActive(ch))h+='<div class="sub small">Pas encore vu en classe (à partir du '+esc(ch.vu)+'), hors expéditions.</div>';
   const m=mastery(ch);
-  h+='<div class="sub small">'+ch.q.length+' questions · maîtrise '+m+' %</div><div class="xpbar"><i style="width:'+m+'%;background:var(--c)"></i></div><div class="lvls">';
+  const ec=inProgress(ch.q),ep=ch.q.length?Math.round(ec/ch.q.length*100):0;
+  h+='<div class="sub small">'+ch.q.length+' questions · '+ec+' en cours · maîtrise '+m+' %</div><div class="xpbar dual"><i style="width:'+m+'%;background:var(--c)"></i><i class="ec" style="width:'+ep+'%;background:var(--c)"></i></div><div class="lvls">';
   ch.levels.forEach((_,k)=>{const open=levelOpen(c.id,ch.id,k),b=S.best[lvlKey(c.id,ch.id,k)];
    h+='<button class="lv'+(open?"":" locked")+'" '+(open?'onclick="startLevel(\''+c.id+'\',\''+ch.id+'\','+k+')"':"disabled")+'><b>'+(open?k+1:"🔒")+'</b>'+(open?starHtml(stars(b||0)):'<span class="stars off">-</span>')+'</button>'});
   const go_=levelOpen(c.id,ch.id,"G"),bg=S.best[lvlKey(c.id,ch.id,"G")];
@@ -220,16 +221,19 @@ async function renderGuide(){
 }
 
 /* ---------- carte d'explorateur ---------- */
+const inProgress=qs=>qs.filter(q=>{const b=(S.srs[q.id]||[0])[0];return b>=1&&b<3}).length;
 function stats(){const days=Object.keys(S.days).filter(d=>S.days[d]>=DAY_MIN).length,answers=Object.values(S.days).reduce((a,b)=>a+b,0),
- mastered=Object.values(S.srs).filter(x=>x[0]>=3).length;return{days,answers,mastered,chests:Object.keys(S.chests).length,quests:Object.keys(S.qdone).length}}
+ mastered=Object.values(S.srs).filter(x=>x[0]>=3).length,prog=Object.values(S.srs).filter(x=>x[0]>=1&&x[0]<3).length;return{days,answers,mastered,prog,chests:Object.keys(S.chests).length,quests:Object.keys(S.qdone).length}}
 function renderCard(edit){
  const r=rank(),st=stats(),it=ITEMS.filter(i=>S.xp>=i[0]),rc=realCourses(),ri=rankIdx();
  const d=new Date().toLocaleDateString("fr-BE",{day:"numeric",month:"long",year:"numeric"});
  let h='<button class="back" onclick="renderHome()">&lt;- L\'île</button>';
  h+='<div class="excard"><div class="exhead">'+HERO+'<div><div class="sub small">Carte d\'explorateur</div><div class="exname">'+esc(S.pseudo||"Explorateur anonyme")+'</div><div class="exrank">'+esc(r.name)+' · rang '+(ri+1)+'/'+RANKS.length+'</div></div></div>';
- h+='<div class="exstats"><div><b>'+S.xp.toLocaleString("fr-BE")+'</b><span>XP</span></div><div><b>'+st.days+'</b><span>jours d\'exploration</span></div><div><b>'+st.mastered+'</b><span>questions maîtrisées</span></div><div><b>'+st.quests+'</b><span>quête'+(st.quests>1?"s":"")+' accomplie'+(st.quests>1?"s":"")+'</span></div></div>';
+ h+='<div class="exstats"><div><b>'+S.xp.toLocaleString("fr-BE")+'</b><span>XP</span></div><div><b>'+st.days+'</b><span>jours d\'exploration</span></div><div><b>'+st.prog+'</b><span>questions en cours</span></div><div><b>'+st.mastered+'</b><span>questions maîtrisées</span></div><div><b>'+st.quests+'</b><span>quête'+(st.quests>1?"s":"")+' accomplie'+(st.quests>1?"s":"")+'</span></div></div>';
  h+='<div class="sub small" style="margin:12px 0 6px">Niveau des zones</div>';
- rc.forEach(c=>{const l=zoneLevel(c);h+='<div class="exzone"><span>'+esc(c.icone)+' '+esc(c.nom)+'</span><div class="xpbar" style="flex:1"><i style="width:'+l*10+'%;background:'+esc(c.couleur)+'"></i></div><b>'+l+'</b></div>'});
+ rc.forEach(c=>{const l=zoneLevel(c),qs=c.chapitres.filter(ch=>isActive(ch)).flatMap(ch=>ch.q),mp=Math.round(zoneMastery(c)*100),ep=qs.length?Math.round(inProgress(qs)/qs.length*100):0;
+  h+='<div class="exzone"><span>'+esc(c.icone)+' '+esc(c.nom)+'</span><div class="xpbar dual" style="flex:1"><i style="width:'+mp+'%;background:'+esc(c.couleur)+'"></i><i class="ec" style="width:'+ep+'%;background:'+esc(c.couleur)+'"></i></div><b>'+l+'</b></div>'});
+ h+='<div class="sub small" style="text-align:right">barre pleine : maîtrisé · barre claire : en cours · chiffre : niveau</div>';
  h+='<div class="sub small" style="margin:12px 0 6px">Objets ('+it.length+'/'+ITEMS.length+')</div><div class="inv">'+ITEMS.map(i=>'<span class="'+(S.xp>=i[0]?"":"lock")+'">'+i[1]+'</span>').join("")+'</div>';
  h+='<div class="exfoot">'+st.chests+' coffre'+(st.chests>1?"s":"")+' hebdo · '+esc(d)+'</div></div>';
  if(edit)h+='<div class="card"><b>Ton pseudo</b><input id="pseudo" class="txt" maxlength="24" value="'+esc(S.pseudo||"")+'" placeholder="Pseudo (pas ton nom complet)"><button class="btn" onclick="savePseudo()">Enregistrer</button></div>';

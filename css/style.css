@@ -99,3 +99,4 @@ h1.fh{font-size:21px;margin-bottom:12px}
 .exzone{display:flex;align-items:center;gap:10px;font-size:14px;margin:6px 0}
 .exzone span{width:120px;flex:none}.exzone .xpbar{margin:0}
 .exfoot{margin-top:14px;font-size:12px;color:var(--mut);text-align:right}
+.xpbar.dual{display:flex}.xpbar.dual i{flex:none}.xpbar.dual i.ec{opacity:.35}
