@@ -57,6 +57,24 @@ node outils/verifier.js
 
 Le script signale les fichiers JSON invalides, les champs manquants et les types inconnus.
 
+## Quêtes de contrôle
+
+Pour un contrôle annoncé, ajouter une entrée dans `data/quetes.json` :
+
+```json
+{
+  "quetes": [
+    { "id": "bio-inne-2026-11-09", "titre": "Contrôle de bio : la réponse immunitaire innée", "date": "2026-11-09", "chapitres": ["bio/inne"] }
+  ]
+}
+```
+
+- `chapitres` : liste de `cours/chapitre`. Un contrôle peut couvrir plusieurs chapitres, même de cours différents.
+- La quête apparaît sur l'accueil jusqu'au jour du contrôle inclus, puis disparaît.
+- Deux boutons : « S'entraîner » (10 questions, les moins maîtrisées d'abord) et « Contrôle blanc » (20 questions, note sur 20).
+- La quête est accomplie (+150 XP) quand 80 % des questions ont été réussies deux fois d'affilée.
+- Dans les 7 jours avant le contrôle, l'expédition du jour pioche en priorité dans ces chapitres.
+
 ## Niveaux
 
 Les niveaux sont calculés automatiquement : les questions d'un chapitre sont triées par difficulté puis découpées en niveaux de 8. Le Gardien (10 questions tirées dans tout le chapitre) s'ouvre quand tous les niveaux sont réussis à 70 %.

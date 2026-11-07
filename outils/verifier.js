@@ -36,5 +36,9 @@ for(const c of idx.cours||[]){
   });
  }
 }
+try{const qd=JSON.parse(fs.readFileSync(path.join(root,"quetes.json"),"utf8"));
+ for(const qu of qd.quetes||[]){if(!qu.id||!qu.titre||!/^\d{4}-\d{2}-\d{2}$/.test(qu.date||""))E("quete "+(qu.id||"?")+" : id, titre ou date (AAAA-MM-JJ) manquant");
+  for(const k of qu.chapitres||[]){const[c,h]=k.split("/");const co=(idx.cours||[]).find(x=>x.id===c);if(!co||!co.chapitres.find(x=>x.id===h))E("quete "+qu.id+" : chapitre inconnu "+k)}}
+}catch(e){if(e.code!=="ENOENT")E("data/quetes.json : "+e.message)}
 console.log("\n"+total+" questions, "+err+" erreur(s), "+warn+" avertissement(s).");
 process.exit(err?1:0);

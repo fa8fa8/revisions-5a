@@ -56,8 +56,15 @@
       "chapitres": [
         {
           "id": "micro",
-          "titre": "UAA 5 · Les micro-organismes et leur transmission",
-          "fichier": "micro.json"
+          "titre": "I. Les micro-organismes et leur transmission",
+          "fichier": "micro.json",
+          "vu": "2026-09-08"
+        },
+        {
+          "id": "inne",
+          "titre": "IV. La réponse immunitaire innée",
+          "fichier": "inne.json",
+          "vu": "2026-10-20"
         }
       ]
     },

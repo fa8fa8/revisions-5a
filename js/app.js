@@ -22,13 +22,13 @@ const HERO='<svg viewBox="0 0 64 64" width="60" height="60" aria-hidden="true"><
 
 /* ---------- état sauvegardé ---------- */
 const KEY="revisions-5a-v1";
-const blank=()=>({v:1,xp:0,best:{},srs:{},days:{},chests:{}});
+const blank=()=>({v:1,xp:0,best:{},srs:{},days:{},chests:{},streak:{},qdone:{},qbest:{}});
 let S=blank();
 try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(blank(),JSON.parse(raw))}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 /* ---------- contenu ---------- */
-let COURS=[];const QIDX={};
+let COURS=[],QUESTS=[];const QIDX={};
 function hash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return(h>>>0).toString(36)}
 function makeLevels(qs){
  const sorted=qs.slice().sort((a,b)=>(a.n||1)-(b.n||1)),L=[];
@@ -39,6 +39,7 @@ function makeLevels(qs){
 async function load(){
  const idx=await fetch("data/cours.json",{cache:"no-cache"}).then(r=>r.json());
  COURS=idx.cours;
+ QUESTS=await fetch("data/quetes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{quetes:[]}).then(d=>d.quetes||[]).catch(()=>[]);
  await Promise.all(COURS.flatMap(c=>c.chapitres.map(ch=>
   fetch("data/"+c.id+"/"+ch.fichier,{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()})
    .then(d=>{ch.q=d.questions||[]}).catch(()=>{ch.q=[];ch.err=true}))));
@@ -55,21 +56,35 @@ const isActive=ch=>!ch.vu||dayOf(ch.vu)<=today();
 const activeChaps=()=>COURS.flatMap(c=>c.chapitres.filter(ch=>isActive(ch)&&ch.q.length));
 
 /* ---------- répétition espacée ---------- */
-function srsUpdate(id,ok){const t=today();let b=(S.srs[id]||[0])[0];b=ok?Math.min(b+1,INT.length-1):0;S.srs[id]=[b,t+(ok?INT[b]:1)]}
+function srsUpdate(id,ok){const t=today(),cur=S.srs[id];if(ok&&cur&&cur[1]>t)return;let b=(cur||[0])[0];b=ok?Math.min(b+1,INT.length-1):0;S.srs[id]=[b,t+(ok?INT[b]:1)]}
 const dueIds=()=>{const t=today();return Object.keys(S.srs).filter(id=>QIDX[id]&&isActive(QIDX[id].ch)&&S.srs[id][1]<=t)};
 const mastery=ch=>ch.q.length?Math.round(ch.q.filter(q=>(S.srs[q.id]||[0])[0]>=3).length/ch.q.length*100):0;
 
 function buildExpedition(){
  const due=dueIds().sort((a,b)=>S.srs[a][1]-S.srs[b][1]).slice(0,Math.ceil(EXP_SIZE*0.6)).map(id=>QIDX[id].q);
  const picked=new Set(due.map(q=>q.id));
- const chs=shuffle(activeChaps()).sort((a,b)=>(b.vu?dayOf(b.vu):0)-(a.vu?dayOf(a.vu):0));
+ const qch=new Set(activeQuests().filter(qu=>qu.days<=7).flatMap(qu=>qu.chapitres));
+ const prio=ch=>qch.has(QIDX[ch.q[0].id].c.id+"/"+ch.id)?1e6:(ch.vu?dayOf(ch.vu):0);
+ const chs=shuffle(activeChaps()).sort((a,b)=>prio(b)-prio(a));
  const fresh=[];
  for(const ch of chs){if(due.length+fresh.length>=EXP_SIZE)break;
-  shuffle(ch.q.filter(q=>!S.srs[q.id]&&!picked.has(q.id))).slice(0,3).forEach(q=>{if(due.length+fresh.length<EXP_SIZE){fresh.push(q);picked.add(q.id)}})}
+  shuffle(ch.q.filter(q=>!S.srs[q.id]&&!picked.has(q.id))).slice(0,prio(ch)>=1e6?5:3).forEach(q=>{if(due.length+fresh.length<EXP_SIZE){fresh.push(q);picked.add(q.id)}})}
  let all=due.concat(fresh);
  if(all.length<EXP_SIZE){const rest=shuffle(chs.flatMap(ch=>ch.q).filter(q=>!picked.has(q.id)));all=all.concat(rest.slice(0,EXP_SIZE-all.length))}
  return shuffle(all);
 }
+
+/* ---------- quêtes de contrôle ---------- */
+const QUEST_GOAL=80; // % de questions réussies 2 fois d'affilée
+function activeQuests(){const t=today();return QUESTS.map(qu=>Object.assign({},qu,{days:dayOf(qu.date)-t})).filter(qu=>qu.days>=0).sort((a,b)=>a.days-b.days)}
+function questQs(qu){return qu.chapitres.flatMap(k=>{const[c,h]=k.split("/"),co=course(c),ch=co&&co.chapitres.find(x=>x.id===h);return ch?ch.q:[]})}
+function questMastery(qu){const qs=questQs(qu);return qs.length?Math.round(qs.filter(q=>(S.streak[q.id]||0)>=2).length/qs.length*100):0}
+const dateLabel=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(Date.UTC(y,m-1,d)).toLocaleDateString("fr-BE",{weekday:"long",day:"numeric",month:"long",timeZone:"UTC"})};
+const countdown=n=>n===0?"aujourd'hui":n===1?"demain":"dans "+n+" jours";
+function startQuest(id,exam){const qu=QUESTS.find(x=>x.id===id),qs=questQs(qu);if(!qs.length)return;
+ let queue;if(exam)queue=shuffle(qs).slice(0,20);
+ else{const w=q=>S.streak[q.id]||0;queue=shuffle(shuffle(qs).sort((a,b)=>w(a)-w(b)).slice(0,10))}
+ begin({mode:exam?"qexam":"quest",questId:id,title:exam?"Contrôle blanc":"Quête",queue})}
 
 /* ---------- progression : rangs, objets, semaine ---------- */
 function rankOf(x){let n=RANKS[0][1];RANKS.forEach(r=>{if(x>=r[0])n=r[1]});return n}
@@ -103,6 +118,10 @@ function renderHome(){
  h+='<div class="card week"><div class="row"><b>Cette semaine</b><span class="sub">'+Math.min(w.n,GOAL_WEEK)+' / '+GOAL_WEEK+' jours'+(w.chest?" · coffre ouvert":"")+'</span></div><div class="days">'+
   w.days.map((d,i)=>'<span class="d'+(d.ok?" ok":"")+(d.today?" now":"")+'">'+L[i]+'</span>').join("")+'</div>'+
   (w.chest?"":'<div class="sub small">'+GOAL_WEEK+' jours d\'exploration ('+DAY_MIN+' réponses par jour) -> coffre de 100 XP</div>')+'</div>';
+ activeQuests().forEach(qu=>{const m=questMastery(qu),n=questQs(qu).length,b=S.qbest[qu.id];
+  h+='<div class="card quest"><div class="row"><b>⚔️ Quête : '+esc(qu.titre)+'</b></div><div class="sub small">'+esc(dateLabel(qu.date))+' ('+countdown(qu.days)+') · '+n+' questions</div>'+
+   '<div class="row small" style="margin-top:8px"><span>Prêt à '+m+' %'+(S.qdone[qu.id]?" · quête accomplie ✓":" · objectif "+QUEST_GOAL+" %")+'</span>'+(b!==undefined?'<span>Contrôle blanc : '+b+'/20</span>':"")+'</div><div class="xpbar"><i style="width:'+m+'%"></i></div>'+
+   '<div class="tools"><button class="btn" onclick="startQuest(\''+qu.id+'\',false)">S\'entraîner</button><button class="btn sec" onclick="startQuest(\''+qu.id+'\',true)">Contrôle blanc</button></div></div>'});
  h+='<button class="btn hero-btn" onclick="startExpedition()">Expédition du jour<small>'+(due?due+" rappel"+(due>1?"s":"")+" prêt"+(due>1?"s":"")+" + nouvelles questions":"Nouvelles questions")+' · '+EXP_SIZE+' questions, arrêt possible à tout moment</small></button>';
  h+='<div class="grid">';
  COURS.forEach(c=>{const chs=c.chapitres.filter(ch=>ch.q.length),m=chs.length?Math.round(chs.reduce((s,ch)=>s+mastery(ch),0)/chs.length):0;
@@ -198,8 +217,10 @@ function answer(g){
  if(q.t==="texte"||q.t==="nombre"){const el=document.getElementById("in");g=el?el.value:"";if(!g.trim())return}
  sess.answered=true;sess.given=g;const ok=check(q,g);sess.okLast=ok;sess.done++;
  srsUpdate(q.id,ok);
+ S.streak[q.id]=ok?(S.streak[q.id]||0)+1:0;
  if(ok){sess.ok++;S.xp+=sess.gain;sess.xp+=sess.gain}
- else if(sess.mode==="exp"&&!sess.again.has(q.id)){sess.again.add(q.id);sess.queue.push(sess.queue[sess.i])}
+ else if((sess.mode==="exp"||sess.mode==="quest")&&!sess.again.has(q.id)){sess.again.add(q.id);sess.queue.push(sess.queue[sess.i])}
+ activeQuests().forEach(qu=>{if(!S.qdone[qu.id]&&questMastery(qu)>=QUEST_GOAL){S.qdone[qu.id]=1;S.xp+=150;sess.questDone=qu.titre}});
  const t=today();S.days[t]=(S.days[t]||0)+1;
  const w=weekInfo();if(w.n>=GOAL_WEEK&&!S.chests[w.ws]){S.chests[w.ws]=1;S.xp+=100;sess.chest=true}
  save();renderQuiz();
@@ -219,7 +240,8 @@ function renderQuiz(){
   if(!A)h+='<button class="btn" onclick="answer()">Valider</button>'}
  if(A){const ok=sess.okLast;
   h+='<div class="fb '+(ok?"ok":"ko")+'"><b>'+(ok?"Bien joué ! +"+sess.gain+" XP":"Pas tout à fait. Réponse : "+esc(shown(q)))+'</b><span class="ex">'+esc(q.e||"")+'</span>'+
-   (ok?"":'<div class="sub small" style="margin-top:6px">Elle reviendra '+(sess.mode==="exp"?"en fin d'expédition et ":"")+'dans tes rappels.</div>')+'</div>';
+   (ok?"":'<div class="sub small" style="margin-top:6px">Elle reviendra '+(sess.mode==="exp"||sess.mode==="quest"?"en fin de session et ":"")+'dans tes rappels.</div>')+'</div>';
+  if(sess.questDone){h+='<div class="fb ok"><b>Quête accomplie : '+esc(sess.questDone)+' ! +150 XP</b><span class="ex">Tu maîtrises '+QUEST_GOAL+' % des questions du contrôle.</span></div>';sess.questDone=null}
   if(sess.chest){h+='<div class="fb ok"><b>Coffre de la semaine ouvert : +100 XP !</b></div>';sess.chestShown=true;sess.chest=false}
   const last=!sess.endless&&sess.i+1>=sess.queue.length;
   h+='<button class="btn" id="nx" onclick="nextQ()">'+(last?"Voir le résultat":"Suivant")+'</button>';
@@ -228,7 +250,7 @@ function renderQuiz(){
  const inp=document.getElementById("in");if(inp&&!A){inp.focus();inp.addEventListener("keydown",e=>{if(e.key==="Enter")answer()})}
 }
 function stop(){if(sess&&sess.done)finish();else back()}
-function back(){const s=sess;sess=null;if(s&&s.cid)renderZone(s.cid);else if(s&&s.mode==="exam")renderExam();else renderHome()}
+function back(){const s=sess;sess=null;if(s&&s.questId)renderHome();else if(s&&s.cid)renderZone(s.cid);else if(s&&s.mode==="exam")renderExam();else renderHome()}
 
 function finish(){
  const s=sess,pct=s.done?Math.round(s.ok/s.done*100):0,complete=s.i+1>=s.queue.length||s.i>=s.queue.length;
@@ -245,8 +267,11 @@ function finish(){
   else if(pct<PASS)h+='<div class="fb ko"><b>Encore un effort</b><span class="ex">'+PASS+' % pour débloquer la suite. Rejoue autant que tu veux : les erreurs reviendront dans tes rappels.</span></div>';
   h+='<button class="btn" onclick="startLevel(\''+s.cid+'\',\''+s.chid+'\','+(k==="G"?"'G'":k)+')">Rejouer</button>';
  }else{
-  const label={exp:"Expédition du jour",train:"Entraînement libre",exam:"Mode examen"}[s.mode];
-  h+='<div class="sub">'+label+(s.mode==="exp"&&complete?" terminée":"")+'</div><div class="score">'+s.ok+' / '+s.done+'</div><p>+'+s.xp+' XP</p>';
+  const label={exp:"Expédition du jour",train:"Entraînement libre",exam:"Mode examen",quest:"Quête",qexam:"Contrôle blanc"}[s.mode];
+  if(s.mode==="qexam"){const note=Math.round(s.ok/s.done*20*2)/2;if(complete)S.qbest[s.questId]=Math.max(S.qbest[s.questId]||0,note);save();
+   h+='<div class="sub">Contrôle blanc'+(complete?"":" (interrompu, non compté)")+'</div><div class="score">'+fmt(note)+' / 20</div><p>'+s.ok+' / '+s.done+' bonnes réponses · +'+s.xp+' XP</p>';}
+  else h+='<div class="sub">'+label+(s.mode==="exp"&&complete?" terminée":"")+'</div><div class="score">'+s.ok+' / '+s.done+'</div><p>+'+s.xp+' XP</p>';
+  if(s.questId){const qu=activeQuests().find(x=>x.id===s.questId);if(qu)h+='<p class="sub">Prêt pour le contrôle à '+questMastery(qu)+' %</p><button class="btn" onclick="startQuest(\''+qu.id+'\','+(s.mode==="qexam")+')">'+(s.mode==="qexam"?"Refaire un contrôle blanc":"Continuer la quête")+'</button>'}
   if(s.mode==="exp"){const d=dueIds().length;h+='<p class="sub">'+(d?d+" rappel"+(d>1?"s":"")+" encore prêt"+(d>1?"s":"")+" aujourd'hui.":"Plus aucun rappel en attente aujourd'hui.")+'</p>'}
   if(s.mode==="exam")h+='<button class="btn" onclick="startExam()">Nouvel examen sur les mêmes chapitres</button>';
  }

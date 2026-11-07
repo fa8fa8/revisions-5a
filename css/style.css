@@ -72,3 +72,5 @@ input.txt:focus{border-color:var(--acc)}
 .end{text-align:center;padding-top:20px}
 .score{font-size:54px;font-weight:700;margin:6px 0}
 .note{color:var(--mut);font-size:13px;text-align:center;margin-top:20px;line-height:1.5}
+.quest{border:1.5px solid var(--acc);background:linear-gradient(135deg,#3d2f0e,#0e3a4e)}
+.quest .tools{margin-top:4px}
