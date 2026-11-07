@@ -145,12 +145,13 @@
   {
    "t": "7. Sauvegarder ta progression",
    "p": [
-    "Ta progression reste **uniquement sur ton téléphone**."
+    "Ta progression est **uniquement sur ton téléphone**. Si tu le perds ou si le cache est vidé, tout disparaît... sauf si tu as envoyé ta sauvegarde ailleurs."
    ],
    "l": [
-    "Accueil -> **Sauvegarde** -> **Copier le code**, et garde-le (note, message à toi-même).",
-    "Sur un nouvel appareil : **Sauvegarde** -> colle le code dans **Importer** -> **Restaurer**.",
-    "Attention : l'import remplace la progression de l'appareil."
+    "Accueil -> **Sauvegarde** -> **📤 Envoyer ma sauvegarde** : envoie le fichier par mail, WhatsApp ou Drive, **à toi-même ou à un parent**.",
+    "Fais-le au moins **une fois par semaine** : l'accueil te le rappelle si ta dernière sauvegarde date de plus de 7 jours.",
+    "Sur un nouveau téléphone : **Sauvegarde** -> **Restaurer** -> choisis le fichier (ou colle le code) -> confirme.",
+    "Attention : restaurer remplace la progression du téléphone."
    ]
   }
  ]

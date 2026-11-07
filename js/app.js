@@ -137,6 +137,7 @@ function renderHome(){
    '<div class="row small" style="margin-top:8px"><span>Vues : '+questSeen(qu)[0]+'/'+n+' · maîtrisées : '+m+' %'+(S.qdone[qu.id]?" ✓":"")+'</span>'+(b!==undefined?'<span>Contrôle blanc : '+b+'/20</span>':"")+'</div><div class="xpbar"><i style="width:'+m+'%"></i></div>'+
    '<div class="tools"><button class="btn" onclick="startQuest(\''+qu.id+'\',false)">S\'entraîner</button><button class="btn sec" onclick="startQuest(\''+qu.id+'\',true)">Contrôle blanc</button></div>'+
    qu.chapitres.map(k=>{const[cc,hh]=k.split("/"),co=course(cc),cp=co&&co.chapitres.find(x=>x.id===hh);return cp&&cp.fiche?'<button class="train fiche-btn" style="margin-top:8px" onclick="renderFiche(\''+cc+'\',\''+hh+'\',true)">📄 Fiche : '+esc(cp.titre)+'</button>':""}).join("")+'</div>'});
+ {const lb=S.lastBackup,ago=lb!=null?today()-lb:null;if(S.xp>=50&&(lb==null||ago>=7))h+='<button class="card backup" onclick="renderSave()">💾 <b>Pense à sauvegarder</b><span class="sub small">'+(lb==null?"Aucune sauvegarde envoyée pour l\'instant":"Dernière sauvegarde il y a "+ago+" jours")+' : envoie-la hors de ton téléphone.</span></button>'}
  h+='<button class="btn hero-btn" onclick="startExpedition()">Expédition du jour<small>'+(due?due+" rappel"+(due>1?"s":"")+" prêt"+(due>1?"s":"")+" + nouvelles questions":"Nouvelles questions")+' · '+EXP_SIZE+' questions, arrêt possible à tout moment</small></button>';
  h+='<div class="grid">';
  COURS.forEach(c=>{const chs=c.chapitres.filter(ch=>ch.q.length),m=chs.length?Math.round(chs.reduce((s,ch)=>s+mastery(ch),0)/chs.length):0;
@@ -180,21 +181,47 @@ function renderExam(){
 }
 function toggleExam(k,on){if(on)examSel.add(k);else examSel.delete(k);const b=document.getElementById("exgo");b.disabled=!examSel.size;b.textContent="Lancer ("+examSel.size+" chapitre"+(examSel.size>1?"s":"")+")"}
 
+/* ---------- sauvegarde ---------- */
 function exportCode(){return"ILE1:"+btoa(unescape(encodeURIComponent(JSON.stringify(S))))}
-function renderSave(msg){
+async function packState(){const json=JSON.stringify(S);
+ if(window.CompressionStream){try{const cs=new Blob([json]).stream().pipeThrough(new CompressionStream("gzip"));const u=new Uint8Array(await new Response(cs).arrayBuffer());let b="";for(let i=0;i<u.length;i+=0x8000)b+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return"ILE2:"+btoa(b)}catch(e){}}
+ return exportCode()}
+async function unpackState(v){v=String(v).replace(/\s+/g,"");
+ if(v.startsWith("ILE1:"))return JSON.parse(decodeURIComponent(escape(atob(v.slice(5)))));
+ if(v.startsWith("ILE2:")){const b=atob(v.slice(5)),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
+  const ds=new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"));return JSON.parse(await new Response(ds).text())}
+ throw 0}
+const isoDay=d=>new Date(d*864e5).toISOString().slice(0,10);
+function markBackup(){S.lastBackup=today();save()}
+let BK="";
+async function renderSave(msg){
+ BK=await packState();const lb=S.lastBackup,ago=lb!=null?today()-lb:null;
  let h='<button class="back" onclick="renderHome()">&lt;- L\'île</button><h1>Sauvegarde</h1>';
- h+='<div class="card"><b>Exporter</b><div class="sub small">Copie ce code et garde-le (note, message à toi-même). Il permet de retrouver ta progression sur un autre téléphone ou après un nettoyage du navigateur.</div><textarea id="exp" readonly>'+esc(exportCode())+'</textarea><button class="btn" onclick="copyCode()">Copier le code</button></div>';
- h+='<div class="card"><b>Importer</b><div class="sub small">Colle un code de sauvegarde. Attention : il remplace la progression actuelle.</div><textarea id="imp" placeholder="ILE1:..."></textarea><button class="btn sec" onclick="importCode()">'+(armed==="imp"?"Confirmer le remplacement ?":"Restaurer")+'</button></div>';
- if(msg)h+='<div class="fb '+(msg[0])+'"><b>'+esc(msg[1])+'</b></div>';
+ if(msg)h+='<div class="fb '+(msg[0])+'" style="margin-bottom:12px"><b>'+esc(msg[1])+'</b></div>';
+ h+='<div class="card"><b>Mettre ta progression à l\'abri</b><div class="sub small" style="margin:4px 0 6px">Ta progression est seulement sur ce téléphone. Envoie ta sauvegarde <b>hors du téléphone</b> (mail, WhatsApp, Drive...), à toi-même ou à un parent : si tu perds ton téléphone, tu pourras tout récupérer.</div>'+
+  '<div class="sub small">Dernière sauvegarde : '+(lb==null?"jamais":ago===0?"aujourd'hui":"il y a "+ago+" jour"+(ago>1?"s":""))+'</div>'+
+  '<button class="btn" onclick="shareBackup()">📤 Envoyer ma sauvegarde</button><div class="tools"><button class="btn sec" onclick="downloadBackup()">⬇️ Fichier</button><button class="btn sec" onclick="copyCode()">📋 Copier le code</button></div><textarea id="exp" readonly>'+esc(BK)+'</textarea></div>';
+ h+='<div class="card"><b>Restaurer</b><div class="sub small">Choisis le fichier de sauvegarde ou colle le code. Attention : ça remplace la progression de ce téléphone.</div>'+
+  '<input type="file" id="impf" accept=".txt,text/plain" class="filein" onchange="loadBackupFile(this)"><textarea id="imp" placeholder="ILE2:..."></textarea><button class="btn sec" onclick="importCode()">'+(armed==="imp"?"Confirmer le remplacement ?":"Restaurer")+'</button></div>';
  go(h);
 }
-function copyCode(){const t=document.getElementById("exp");try{navigator.clipboard.writeText(t.value).then(()=>renderSave(["ok","Code copié."]),()=>{t.select()})}catch(e){t.select()}}
-function importCode(){
+async function shareBackup(){
+ const name="sauvegarde-ile-"+isoDay(today())+".txt",title="Sauvegarde L'Île aux Révisions";
+ try{const f=new File([BK],name,{type:"text/plain"});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title});markBackup();return renderSave(["ok","Sauvegarde envoyée. Garde-la bien !"])}
+  if(navigator.share){await navigator.share({title,text:BK});markBackup();return renderSave(["ok","Sauvegarde envoyée. Garde-la bien !"])}
+ }catch(e){if(e&&e.name==="AbortError")return}
+ downloadBackup();
+}
+function downloadBackup(){try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([BK],{type:"text/plain"}));a.download="sauvegarde-ile-"+isoDay(today())+".txt";document.body.appendChild(a);a.click();a.remove();markBackup();renderSave(["ok","Fichier téléchargé. Envoie-le hors du téléphone (mail, Drive...)."])}catch(e){renderSave(["ko","Téléchargement impossible : utilise « Copier le code »."])}}
+function copyCode(){const t=document.getElementById("exp");try{navigator.clipboard.writeText(t.value).then(()=>{markBackup();renderSave(["ok","Code copié : colle-le dans un mail ou un message à toi-même."])},()=>{t.select()})}catch(e){t.select()}}
+function loadBackupFile(inp){const f=inp.files&&inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{document.getElementById("imp").value=String(r.result).trim()};r.readAsText(f)}
+async function importCode(){
  const v=(document.getElementById("imp").value||"").trim();
- if(armed!=="imp"){armed="imp";renderSave();document.getElementById("imp").value=v;return}
+ if(armed!=="imp"){armed="imp";await renderSave();document.getElementById("imp").value=v;return}
  armed=null;
- try{if(!v.startsWith("ILE1:"))throw 0;const d=JSON.parse(decodeURIComponent(escape(atob(v.slice(5)))));if(typeof d.xp!=="number")throw 0;S=Object.assign(blank(),d);save();renderSave(["ok","Progression restaurée."])}
- catch(e){renderSave(["ko","Code invalide."])}
+ try{const d=await unpackState(v);if(typeof d.xp!=="number")throw 0;S=Object.assign(blank(),d);save();renderSave(["ok","Progression restaurée."])}
+ catch(e){renderSave(["ko","Code ou fichier invalide."])}
 }
 
 /* ---------- fiches récapitulatives ---------- */

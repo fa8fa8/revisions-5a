@@ -100,3 +100,6 @@ h1.fh{font-size:21px;margin-bottom:12px}
 .exzone span{width:120px;flex:none}.exzone .xpbar{margin:0}
 .exfoot{margin-top:14px;font-size:12px;color:var(--mut);text-align:right}
 .xpbar.dual{display:flex}.xpbar.dual i{flex:none}.xpbar.dual i.ec{opacity:.35}
+.card.backup{display:block;width:100%;text-align:left;border:1.5px dashed var(--acc)}
+.card.backup span{display:block;margin-top:4px}
+.filein{margin:10px 0 0;color:var(--mut);font-size:13px;width:100%}
