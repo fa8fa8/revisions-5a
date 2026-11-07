@@ -75,9 +75,21 @@
       "chapitres": [
         {
           "id": "micro",
-          "titre": "I. Les micro-organismes et leur transmission",
+          "titre": "I. Les micro-organismes : transmission, multiplication, médicaments",
           "fichier": "micro.json",
           "vu": "2026-09-08"
+        },
+        {
+          "id": "composants",
+          "titre": "II. Les composants du système immunitaire",
+          "fichier": "composants.json",
+          "vu": "2026-09-29"
+        },
+        {
+          "id": "soi",
+          "titre": "III. Soi et non-soi, réponse immunitaire",
+          "fichier": "soi.json",
+          "vu": "2026-10-06"
         },
         {
           "id": "inne",
