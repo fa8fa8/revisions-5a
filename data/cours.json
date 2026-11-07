@@ -41,6 +41,12 @@
       "couleur": "#2fd3a0",
       "chapitres": [
         {
+          "id": "annexes",
+          "titre": "0. Annexes : symboles des éléments et radicaux",
+          "fichier": "annexes.json",
+          "vu": "2026-09-01"
+        },
+        {
           "id": "rappels",
           "titre": "1. Rappels : Bohr, tableau périodique, électronégativité",
           "fichier": "rappels.json",

@@ -67,4 +67,13 @@ Object.assign(GEN,{
   const t=d>=1.7?"ionique":d>0?"covalente polarisée":"covalente pure";
   return mkQcm("Quel type de liaison entre "+p[0]+" (χ = "+fmtChi(a)+") et "+p[1]+" (χ = "+fmtChi(b)+") ?",t,["ionique","covalente polarisée","covalente pure"],"Δχ = "+fmtChi(d)+" : "+(d>=1.7?"Δχ ≥ 1,7 -> ionique":d>0?"0 < Δχ < 1,7 -> covalente polarisée":"Δχ = 0 -> covalente pure"))}
 });
+
+// tableau « Principaux radicaux et leur valence » (annexe du cours)
+const RAD=[["OH⁻","hydroxyde",1],["NO₂⁻","nitrite",1],["NO₃⁻","nitrate",1],["HCO₃⁻","hydrogénocarbonate",1],["HSO₃⁻","hydrogénosulfite",1],["HSO₄⁻","hydrogénosulfate",1],["H₂PO₃⁻","dihydrogénophosphite",1],["H₂PO₄⁻","dihydrogénophosphate",1],["ClO⁻","hypochlorite",1],["ClO₂⁻","chlorite",1],["ClO₃⁻","chlorate",1],["ClO₄⁻","perchlorate",1],["BrO⁻","hypobromite",1],["BrO₂⁻","bromite",1],["BrO₃⁻","bromate",1],["BrO₄⁻","perbromate",1],["IO⁻","hypoiodite",1],["IO₂⁻","iodite",1],["IO₃⁻","iodate",1],["IO₄⁻","periodate",1],["MnO₄⁻","permanganate",1],["CN⁻","cyanure",1],["CH₃COO⁻","acétate",1],["NH₄⁺","ammonium",1],["H₃O⁺","hydronium",1],["CO₃²⁻","carbonate",2],["SO₃²⁻","sulfite",2],["SO₄²⁻","sulfate",2],["S₂O₃²⁻","thiosulfate",2],["HPO₃²⁻","hydrogénophosphite",2],["HPO₄²⁻","hydrogénophosphate",2],["CrO₄²⁻","chromate",2],["Cr₂O₇²⁻","dichromate",2],["PO₃³⁻","phosphite",3],["PO₄³⁻","phosphate",3]];
+const sameBase=(a,b)=>a[0].replace(/[⁰-⁹⁺⁻₀-₉H]/g,"").slice(0,2)===b[0].replace(/[⁰-⁹⁺⁻₀-₉H]/g,"").slice(0,2);
+Object.assign(GEN,{
+ radicalNom(){const r=pick(RAD);return mkQcm("Quel est le nom du radical "+r[0]+" ?",r[1],shuffle(RAD.filter(x=>x!==r&&sameBase(x,r))).map(x=>x[1]).concat(shuffle(RAD).map(x=>x[1])),r[0]+" : "+r[1]+" (valence "+["","I","II","III"][r[2]]+")")},
+ radicalFormule(){const r=pick(RAD);return mkQcm("Quelle est la formule du radical "+r[1]+" ?",r[0],shuffle(RAD.filter(x=>x!==r&&sameBase(x,r))).map(x=>x[0]).concat(shuffle(RAD).map(x=>x[0])),r[1]+" : "+r[0])},
+ radicalValence(){const r=pick(RAD);return{t:"nombre",q:"Quelle est la valence du radical "+r[1]+" ("+r[0]+") ? (réponds par un nombre)",a:r[2],e:"Valence "+r[2]+" : la charge de l'ion vaut "+r[2]+"."}}
+});
 if(typeof module!=="undefined")module.exports={GEN,R,pick,shuffle,fmt,norm};

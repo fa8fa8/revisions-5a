@@ -1,0 +1,21 @@
+{
+ "questions": [
+  {"n": 1, "gen": "symbole"},
+  {"n": 1, "gen": "symbole"},
+  {"n": 1, "gen": "symbole"},
+  {"n": 1, "gen": "element"},
+  {"n": 1, "gen": "element"},
+  {"n": 2, "gen": "element"},
+  {"n": 1, "gen": "radicalNom"},
+  {"n": 1, "gen": "radicalNom"},
+  {"n": 1, "gen": "radicalFormule"},
+  {"n": 2, "gen": "radicalFormule"},
+  {"n": 2, "gen": "radicalNom"},
+  {"n": 2, "gen": "radicalFormule"},
+  {"n": 2, "gen": "radicalValence"},
+  {"n": 2, "gen": "radicalValence"},
+  {"n": 1, "type": "qcm", "q": "Quelle est la différence entre un nitrite et un nitrate ?", "choix": ["nitrite : NO₂⁻ ; nitrate : NO₃⁻", "nitrite : NO₃⁻ ; nitrate : NO₂⁻", "nitrite : NO₂²⁻ ; nitrate : NO₃⁻", "aucune"], "expl": "En -ite : un oxygène de moins qu'en -ate (sulfite SO₃²⁻ / sulfate SO₄²⁻)."},
+  {"n": 2, "type": "qcm", "q": "Pour les radicaux du chlore, quel est l'ordre du moins au plus oxygéné ?", "choix": ["hypochlorite, chlorite, chlorate, perchlorate", "chlorite, hypochlorite, perchlorate, chlorate", "chlorate, chlorite, perchlorate, hypochlorite", "perchlorate, chlorate, chlorite, hypochlorite"], "expl": "ClO⁻, ClO₂⁻, ClO₃⁻, ClO₄⁻. Même logique pour le brome et l'iode."},
+  {"n": 2, "type": "qcm", "q": "Quels radicaux sont des cations (charge positive) ?", "choix": ["ammonium NH₄⁺ et hydronium H₃O⁺", "hydroxyde OH⁻ et cyanure CN⁻", "sulfate SO₄²⁻ et carbonate CO₃²⁻", "phosphate PO₄³⁻ et phosphite PO₃³⁻"], "expl": "Tous les autres radicaux du tableau sont des anions."}
+ ]
+}
