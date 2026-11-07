@@ -229,13 +229,13 @@ function renderCard(edit){
  const d=new Date().toLocaleDateString("fr-BE",{day:"numeric",month:"long",year:"numeric"});
  let h='<button class="back" onclick="renderHome()">&lt;- L\'île</button>';
  h+='<div class="excard"><div class="exhead">'+HERO+'<div><div class="sub small">Carte d\'explorateur</div><div class="exname">'+esc(S.pseudo||"Explorateur anonyme")+'</div><div class="exrank">'+esc(r.name)+' · rang '+(ri+1)+'/'+RANKS.length+'</div></div></div>';
- h+='<div class="exstats"><div><b>'+S.xp.toLocaleString("fr-BE")+'</b><span>XP</span></div><div><b>'+st.days+'</b><span>jours d\'exploration</span></div><div><b>'+st.prog+'</b><span>questions en cours</span></div><div><b>'+st.mastered+'</b><span>questions maîtrisées</span></div><div><b>'+st.quests+'</b><span>quête'+(st.quests>1?"s":"")+' accomplie'+(st.quests>1?"s":"")+'</span></div></div>';
+ h+='<div class="exstats"><div><b>'+S.xp.toLocaleString("fr-BE")+'</b><span>XP</span></div><div><b>'+st.days+'</b><span>jours d\'exploration</span></div><div><b>'+st.prog+'</b><span>questions en cours</span></div><div><b>'+st.mastered+'</b><span>questions maîtrisées</span></div><div><b>'+st.quests+'</b><span>quête'+(st.quests>1?"s":"")+' accomplie'+(st.quests>1?"s":"")+'</span></div><div><b>'+st.chests+'</b><span>coffre'+(st.chests>1?"s":"")+' hebdo</span></div></div>';
  h+='<div class="sub small" style="margin:12px 0 6px">Niveau des zones</div>';
  rc.forEach(c=>{const l=zoneLevel(c),qs=c.chapitres.filter(ch=>isActive(ch)).flatMap(ch=>ch.q),mp=Math.round(zoneMastery(c)*100),ep=qs.length?Math.round(inProgress(qs)/qs.length*100):0;
   h+='<div class="exzone"><span>'+esc(c.icone)+' '+esc(c.nom)+'</span><div class="xpbar dual" style="flex:1"><i style="width:'+mp+'%;background:'+esc(c.couleur)+'"></i><i class="ec" style="width:'+ep+'%;background:'+esc(c.couleur)+'"></i></div><b>'+l+'</b></div>'});
- h+='<div class="sub small" style="text-align:right">barre pleine : maîtrisé · barre claire : en cours · chiffre : niveau</div>';
+ h+='<div class="sub small" style="text-align:right">plein : maîtrisé · clair : en cours · chiffre : niveau</div>';
  h+='<div class="sub small" style="margin:12px 0 6px">Objets ('+it.length+'/'+ITEMS.length+')</div><div class="inv">'+ITEMS.map(i=>'<span class="'+(S.xp>=i[0]?"":"lock")+'">'+i[1]+'</span>').join("")+'</div>';
- h+='<div class="exfoot">'+st.chests+' coffre'+(st.chests>1?"s":"")+' hebdo · '+esc(d)+'</div></div>';
+ h+='<div class="exfoot">'+esc(d)+'</div></div>';
  if(edit)h+='<div class="card"><b>Ton pseudo</b><input id="pseudo" class="txt" maxlength="24" value="'+esc(S.pseudo||"")+'" placeholder="Pseudo (pas ton nom complet)"><button class="btn" onclick="savePseudo()">Enregistrer</button></div>';
  else h+='<button class="btn sec" onclick="renderCard(true)">Changer de pseudo</button>';
  h+='<div class="note">Fais une capture d\'écran pour partager ta carte. Le rang ne monte qu\'en révisant toutes les matières régulièrement.</div>';
