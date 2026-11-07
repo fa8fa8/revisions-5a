@@ -1,0 +1,135 @@
+{
+  "cours": [
+    {
+      "id": "math",
+      "nom": "Mathématiques",
+      "zone": "Volcan des Nombres",
+      "icone": "🌋",
+      "couleur": "#f5a524",
+      "chapitres": [
+        {
+          "id": "deg2",
+          "titre": "Fonctions du second degré",
+          "fichier": "deg2.json"
+        },
+        {
+          "id": "trigo",
+          "titre": "Trigonométrie",
+          "fichier": "trigo.json"
+        }
+      ]
+    },
+    {
+      "id": "phys",
+      "nom": "Physique",
+      "zone": "Falaises du Vent",
+      "icone": "🌬️",
+      "couleur": "#4f8cff",
+      "chapitres": [
+        {
+          "id": "mvt",
+          "titre": "Mouvements (MRU / MRUA)",
+          "fichier": "mvt.json"
+        }
+      ]
+    },
+    {
+      "id": "chim",
+      "nom": "Chimie",
+      "zone": "Lagon des Alchimistes",
+      "icone": "🧪",
+      "couleur": "#2fd3a0",
+      "chapitres": [
+        {
+          "id": "mole",
+          "titre": "La mole et la stœchiométrie",
+          "fichier": "mole.json"
+        }
+      ]
+    },
+    {
+      "id": "bio",
+      "nom": "Biologie",
+      "zone": "Jungle Vivante",
+      "icone": "🌴",
+      "couleur": "#7ddc5a",
+      "chapitres": [
+        {
+          "id": "adn",
+          "titre": "Cellule, ADN et divisions",
+          "fichier": "adn.json"
+        }
+      ]
+    },
+    {
+      "id": "fr",
+      "nom": "Français",
+      "zone": "Village des Conteurs",
+      "icone": "📜",
+      "couleur": "#ff6b8a",
+      "chapitres": [
+        {
+          "id": "style",
+          "titre": "Figures de style et argumentation",
+          "fichier": "style.json"
+        }
+      ]
+    },
+    {
+      "id": "en",
+      "nom": "Anglais",
+      "zone": "Port des Marchands",
+      "icone": "⚓",
+      "couleur": "#c084fc",
+      "chapitres": [
+        {
+          "id": "tenses",
+          "titre": "Tenses and conditionals",
+          "fichier": "tenses.json"
+        }
+      ]
+    },
+    {
+      "id": "nl",
+      "nom": "Néerlandais",
+      "zone": "Moulin des Polders",
+      "icone": "🌷",
+      "couleur": "#ff8f3d",
+      "chapitres": [
+        {
+          "id": "gram",
+          "titre": "Grammatica: perfectum en woordorde",
+          "fichier": "gram.json"
+        }
+      ]
+    },
+    {
+      "id": "hist",
+      "nom": "Histoire",
+      "zone": "Ruines Anciennes",
+      "icone": "🏛️",
+      "couleur": "#d9b26f",
+      "chapitres": [
+        {
+          "id": "revol",
+          "titre": "L'ère des révolutions",
+          "fichier": "revol.json"
+        }
+      ]
+    },
+    {
+      "id": "geo",
+      "nom": "Géographie",
+      "zone": "Pointe du Cartographe",
+      "icone": "🗺️",
+      "couleur": "#38bdf8",
+      "chapitres": [
+        {
+          "id": "pop",
+          "titre": "Cartes, climats et population",
+          "fichier": "pop.json"
+        }
+      ]
+    }
+  ]
+}

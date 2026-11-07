@@ -1,0 +1,14 @@
+{
+ "questions": [
+  {"n": 1, "type": "nombre", "q": "Masse molaire de H₂O en g/mol ? (H = 1, O = 16)", "rep": 18, "expl": "2 × 1 + 16 = 18 g/mol."},
+  {"n": 1, "type": "nombre", "q": "Masse molaire de CO₂ en g/mol ? (C = 12, O = 16)", "rep": 44, "expl": "12 + 2 × 16 = 44 g/mol."},
+  {"n": 1, "type": "qcm", "q": "Le nombre d'Avogadro vaut environ...", "choix": ["6,02 × 10²³", "3,00 × 10⁸", "9,81", "1,6 × 10⁻¹⁹"], "expl": "Une mole contient 6,02 × 10²³ entités."},
+  {"n": 1, "type": "vf", "q": "Lors d'une réaction chimique, la masse totale se conserve.", "rep": true, "expl": "Loi de Lavoisier : rien ne se perd, rien ne se crée."},
+  {"n": 1, "type": "qcm", "q": "Une solution de pH 3 est...", "choix": ["acide", "neutre", "basique", "impossible"], "expl": "pH < 7 : acide ; pH = 7 : neutre ; pH > 7 : basique."},
+  {"n": 2, "gen": "mole"},
+  {"n": 2, "gen": "mole"},
+  {"n": 2, "type": "nombre", "q": "Équilibre : _ H₂ + O₂ -> _ H₂O. Quel coefficient devant H₂O ?", "rep": 2, "expl": "2 H₂ + O₂ -> 2 H₂O : 4 H et 2 O de chaque côté."},
+  {"n": 2, "type": "qcm", "q": "Unité de la concentration molaire ?", "choix": ["mol/L", "g/mol", "mol/g", "L/mol"], "expl": "c = n / V, en mol/L."},
+  {"n": 2, "type": "qcm", "q": "Volume molaire d'un gaz à 0 °C et 1 atm ?", "choix": ["22,4 L/mol", "1 L/mol", "24,0 mL/mol", "6,02 L/mol"], "expl": "Dans les conditions normales (0 °C, 1 atm), Vm = 22,4 L/mol."}
+ ]
+}

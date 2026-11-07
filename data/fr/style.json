@@ -1,0 +1,14 @@
+{
+ "questions": [
+  {"n": 1, "type": "qcm", "q": "« Il est fort comme un lion. »", "choix": ["comparaison", "métaphore", "hyperbole", "litote"], "expl": "Outil de comparaison « comme » : c'est une comparaison."},
+  {"n": 1, "type": "qcm", "q": "« Ce guerrier est un lion. »", "choix": ["métaphore", "comparaison", "personnification", "oxymore"], "expl": "Rapprochement sans outil de comparaison : métaphore."},
+  {"n": 1, "type": "qcm", "q": "« Je meurs de soif. »", "choix": ["hyperbole", "litote", "euphémisme", "antithèse"], "expl": "Exagération : hyperbole."},
+  {"n": 1, "type": "qcm", "q": "« Le vent hurle. »", "choix": ["personnification", "métonymie", "litote", "oxymore"], "expl": "On prête au vent un comportement humain."},
+  {"n": 1, "type": "qcm", "q": "Dans un texte argumentatif, la thèse est...", "choix": ["la position défendue", "un exemple", "la conclusion du récit", "un connecteur"], "expl": "La thèse est l'opinion que l'auteur défend."},
+  {"n": 2, "type": "qcm", "q": "« Il n'est pas bête » (pour dire qu'il est intelligent).", "choix": ["litote", "hyperbole", "euphémisme", "antiphrase"], "expl": "Dire moins pour suggérer plus : litote."},
+  {"n": 2, "type": "qcm", "q": "« Boire un verre. »", "choix": ["métonymie", "métaphore", "périphrase", "hyperbole"], "expl": "Le contenant désigne le contenu : métonymie."},
+  {"n": 2, "type": "qcm", "q": "« Cette obscure clarté qui tombe des étoiles » (Corneille).", "choix": ["oxymore", "antithèse", "comparaison", "litote"], "expl": "Deux termes contradictoires accolés : oxymore."},
+  {"n": 2, "type": "qcm", "q": "Quel connecteur introduit une concession ?", "choix": ["certes", "donc", "ensuite", "car"], "expl": "« Certes... mais » : on admet un argument adverse."},
+  {"n": 2, "type": "vf", "q": "Un argument d'autorité s'appuie sur l'avis d'une personne reconnue.", "rep": true, "expl": "On invoque un expert ou une figure reconnue."}
+ ]
+}

@@ -1,0 +1,14 @@
+{
+ "questions": [
+  {"n": 1, "type": "texte", "q": "Past simple of « go » ?", "rep": ["went"], "expl": "go, went, gone."},
+  {"n": 1, "type": "texte", "q": "Past participle of « write » ?", "rep": ["written"], "expl": "write, wrote, written."},
+  {"n": 1, "type": "qcm", "q": "How ___ money do you have?", "choix": ["much", "many", "lot", "few"], "expl": "Money est indénombrable : much."},
+  {"n": 1, "type": "qcm", "q": "« Actually » signifie...", "choix": ["en fait", "actuellement", "activement", "exactement"], "expl": "Faux-ami : actuellement = currently."},
+  {"n": 1, "type": "qcm", "q": "« Sensible » signifie...", "choix": ["raisonnable", "sensible", "sensuel", "sensé être"], "expl": "Faux-ami : sensible (FR) = sensitive."},
+  {"n": 2, "type": "qcm", "q": "I ___ here since 2015.", "choix": ["have lived", "live", "lived", "am living"], "expl": "Since + action qui dure jusqu'à maintenant : present perfect."},
+  {"n": 2, "type": "qcm", "q": "She ___ TV when I called. (action en cours interrompue)", "choix": ["was watching", "watched", "is watching", "has watched"], "expl": "Past continuous pour l'action en cours, past simple pour l'interruption."},
+  {"n": 2, "type": "qcm", "q": "If I ___ rich, I would travel the world.", "choix": ["were", "am", "will be", "would be"], "expl": "Second conditional : if + past, would + base verbale. Avec be, la forme standard est « were » à toutes les personnes (« If I was » existe à l'oral, mais à l'école on attend « were »)."},
+  {"n": 2, "type": "qcm", "q": "If I had known, I ___ come.", "choix": ["would have", "will have", "would", "had"], "expl": "Third conditional : if + past perfect, would have + participe passé."},
+  {"n": 2, "type": "qcm", "q": "He's used to ___ up early.", "choix": ["getting", "get", "got", "have got"], "expl": "Be used to + V-ing."}
+ ]
+}

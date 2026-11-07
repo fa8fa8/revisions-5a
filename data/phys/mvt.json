@@ -1,0 +1,14 @@
+{
+ "questions": [
+  {"n": 1, "gen": "mru"},
+  {"n": 1, "type": "qcm", "q": "Unité SI de l'accélération ?", "choix": ["m/s²", "m/s", "km/h", "N"], "expl": "L'accélération est une variation de vitesse (m/s) par seconde : m/s²."},
+  {"n": 1, "type": "vf", "q": "Dans un MRU, l'accélération est nulle.", "rep": true, "expl": "MRU : vitesse constante, donc accélération nulle."},
+  {"n": 1, "type": "nombre", "q": "Convertis 72 km/h en m/s.", "rep": 20, "expl": "72 / 3,6 = 20 m/s."},
+  {"n": 1, "type": "qcm", "q": "Valeur approximative de g à la surface de la Terre ?", "choix": ["9,81 m/s²", "1,62 m/s²", "98,1 m/s²", "0,981 m/s²"], "expl": "g ≈ 9,81 m/s² (1,62 m/s², c'est la Lune)."},
+  {"n": 2, "gen": "mrua"},
+  {"n": 2, "gen": "mruaD"},
+  {"n": 2, "gen": "mrua"},
+  {"n": 2, "type": "qcm", "q": "Sur un graphique v(t), la pente de la droite représente...", "choix": ["l'accélération", "la distance", "la position initiale", "la masse"], "expl": "a = Δv / Δt : c'est la pente de v(t)."},
+  {"n": 2, "type": "qcm", "q": "Sur un graphique v(t), l'aire sous la courbe représente...", "choix": ["la distance parcourue", "l'accélération", "la vitesse moyenne", "le temps"], "expl": "L'aire sous v(t) donne le déplacement."}
+ ]
+}

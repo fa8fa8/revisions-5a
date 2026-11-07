@@ -1,0 +1,14 @@
+{
+ "questions": [
+  {"n": 1, "gen": "delta"},
+  {"n": 1, "gen": "delta"},
+  {"n": 1, "gen": "sommet"},
+  {"n": 1, "type": "qcm", "q": "Si Δ < 0, la parabole...", "choix": ["ne coupe pas l'axe des x", "coupe l'axe des x en un seul point", "coupe l'axe des x en deux points", "passe par l'origine"], "expl": "Δ < 0 : pas de racine réelle, donc aucune intersection avec l'axe des x."},
+  {"n": 1, "type": "vf", "q": "Si a < 0, la parabole est tournée vers le bas.", "rep": true, "expl": "a < 0 : la parabole a un maximum (concavité vers le bas)."},
+  {"n": 2, "gen": "racines"},
+  {"n": 2, "gen": "racines"},
+  {"n": 2, "gen": "sommet"},
+  {"n": 2, "type": "qcm", "q": "Pour ax² + bx + c, la somme des racines vaut...", "choix": ["-b/a", "b/a", "c/a", "-c/a"], "expl": "x₁ + x₂ = -b/a et x₁·x₂ = c/a."},
+  {"n": 2, "type": "qcm", "q": "Pour ax² + bx + c, le produit des racines vaut...", "choix": ["c/a", "-b/a", "b/c", "a/c"], "expl": "x₁·x₂ = c/a."}
+ ]
+}

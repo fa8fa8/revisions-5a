@@ -1,0 +1,14 @@
+{
+ "questions": [
+  {"n": 1, "type": "nombre", "q": "En quelle année commence la Révolution française ?", "rep": 1789, "expl": "1789 : États généraux, prise de la Bastille."},
+  {"n": 1, "type": "nombre", "q": "En quelle année la Belgique devient-elle indépendante ?", "rep": 1830, "expl": "Révolution belge de 1830."},
+  {"n": 1, "type": "qcm", "q": "Dans quel pays commence la révolution industrielle ?", "choix": ["Angleterre", "France", "Belgique", "Allemagne"], "expl": "Grande-Bretagne, au XVIIIe siècle."},
+  {"n": 1, "type": "qcm", "q": "Premier roi des Belges ?", "choix": ["Léopold Ier", "Léopold II", "Albert Ier", "Baudouin"], "expl": "Léopold Ier prête serment le 21 juillet 1831."},
+  {"n": 1, "type": "vf", "q": "Napoléon est définitivement battu à Waterloo en 1815.", "rep": true, "expl": "18 juin 1815."},
+  {"n": 2, "type": "nombre", "q": "Année de la Déclaration d'indépendance des États-Unis ?", "rep": 1776, "expl": "4 juillet 1776."},
+  {"n": 2, "type": "qcm", "q": "Le suffrage censitaire réserve le vote...", "choix": ["à ceux qui paient un certain montant d'impôt", "à tous les hommes adultes", "aux nobles uniquement", "à tous les citoyens"], "expl": "Le cens est un seuil d'impôt payé."},
+  {"n": 2, "type": "qcm", "q": "Qui améliore la machine à vapeur dans les années 1760-1780 ?", "choix": ["James Watt", "Thomas Edison", "Isaac Newton", "John Cockerill"], "expl": "James Watt. John Cockerill l'industrialise ensuite en Belgique."},
+  {"n": 2, "type": "qcm", "q": "Le Congrès de Vienne a lieu en...", "choix": ["1814-1815", "1789", "1830", "1848"], "expl": "Il réorganise l'Europe après Napoléon."},
+  {"n": 2, "type": "vf", "q": "La Constitution belge date de 1831.", "rep": true, "expl": "Adoptée le 7 février 1831."}
+ ]
+}

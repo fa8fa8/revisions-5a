@@ -1,0 +1,14 @@
+{
+ "questions": [
+  {"n": 1, "gen": "echelle"},
+  {"n": 1, "type": "qcm", "q": "Le climat de la Belgique est...", "choix": ["tempéré océanique", "continental", "méditerranéen", "subtropical"], "expl": "Hivers doux, étés frais, pluies toute l'année."},
+  {"n": 1, "type": "qcm", "q": "Des courbes de niveau très rapprochées indiquent...", "choix": ["une pente forte", "une plaine", "un cours d'eau", "une pente douce"], "expl": "Beaucoup de dénivelé sur peu de distance."},
+  {"n": 1, "type": "vf", "q": "Le méridien de Greenwich correspond à la longitude 0°.", "rep": true, "expl": "C'est le méridien de référence."},
+  {"n": 1, "type": "qcm", "q": "Population mondiale actuelle, environ ?", "choix": ["8 milliards", "5 milliards", "12 milliards", "800 millions"], "expl": "Environ 8,2 milliards en 2025."},
+  {"n": 2, "gen": "echelle"},
+  {"n": 2, "type": "qcm", "q": "Le taux de natalité est le nombre de naissances...", "choix": ["pour 1 000 habitants par an", "par femme", "pour 100 habitants par mois", "par famille"], "expl": "Le nombre d'enfants par femme, c'est l'indice de fécondité."},
+  {"n": 2, "type": "qcm", "q": "Dans la transition démographique, quel taux baisse en premier ?", "choix": ["la mortalité", "la natalité", "les deux en même temps", "aucun"], "expl": "La mortalité chute d'abord, la natalité suit plus tard."},
+  {"n": 2, "type": "qcm", "q": "Une isohyète relie les points d'égales...", "choix": ["précipitations", "températures", "altitudes", "pressions"], "expl": "Isotherme : températures ; isobare : pressions."},
+  {"n": 2, "type": "qcm", "q": "Pays le plus peuplé du monde aujourd'hui ?", "choix": ["Inde", "Chine", "États-Unis", "Indonésie"], "expl": "L'Inde a dépassé la Chine en 2023."}
+ ]
+}

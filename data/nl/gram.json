@@ -1,0 +1,14 @@
+{
+ "questions": [
+  {"n": 1, "type": "texte", "q": "Voltooid deelwoord van « lezen » ? (Ik heb een boek ___.)", "rep": ["gelezen"], "expl": "lezen, las, gelezen."},
+  {"n": 1, "type": "texte", "q": "Voltooid deelwoord van « werken » ?", "rep": ["gewerkt"], "expl": "Radical werk- finit par k (« 't kofschip ») : -t."},
+  {"n": 1, "type": "qcm", "q": "De of het? ___ huis", "choix": ["het", "de"], "expl": "het huis."},
+  {"n": 1, "type": "qcm", "q": "« de vergadering » signifie...", "choix": ["la réunion", "l'assurance", "le rassemblement de foule", "la vérification"], "expl": "vergadering = réunion."},
+  {"n": 1, "type": "qcm", "q": "Gisteren ___ ik ziek.", "choix": ["was", "ben", "waren", "is"], "expl": "Imperfectum de zijn : ik was, wij waren."},
+  {"n": 2, "type": "qcm", "q": "Ik ___ gisteren naar school gegaan.", "choix": ["ben", "heb", "word", "was"], "expl": "Gaan avec une destination : auxiliaire zijn."},
+  {"n": 2, "type": "texte", "q": "Voltooid deelwoord van « kopen » ?", "rep": ["gekocht"], "expl": "kopen, kocht, gekocht (irrégulier)."},
+  {"n": 2, "type": "qcm", "q": "Quelle phrase est correcte ?", "choix": ["Ik weet dat hij morgen komt.", "Ik weet dat hij komt morgen.", "Ik weet dat komt hij morgen.", "Ik weet dat morgen hij komt."], "expl": "Dans la subordonnée (dat), le verbe conjugué va à la fin."},
+  {"n": 2, "type": "qcm", "q": "Quelle phrase respecte l'inversion ?", "choix": ["Morgen ga ik naar huis.", "Morgen ik ga naar huis.", "Morgen ik naar huis ga.", "Ga morgen ik naar huis."], "expl": "Inversion : le verbe reste en 2e position."},
+  {"n": 2, "type": "qcm", "q": "Ik blijf thuis ___ ik ziek ben.", "choix": ["omdat", "want", "dus", "maar"], "expl": "Omdat + verbe en fin de phrase (want garde l'ordre normal : want ik ben ziek)."}
+ ]
+}
