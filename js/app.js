@@ -224,6 +224,7 @@ function answer(g){
  srsUpdate(q.id,ok);
  S.streak[q.id]=ok?(S.streak[q.id]||0)+1:0;
  if(ok){sess.ok++;S.xp+=sess.gain;sess.xp+=sess.gain}
+ else if(g==="partiel"){const h=Math.floor(sess.gain/2);S.xp+=h;sess.xp+=h}
  else if((sess.mode==="exp"||sess.mode==="quest")&&!sess.again.has(q.id)){sess.again.add(q.id);sess.queue.push(sess.queue[sess.i])}
  activeQuests().forEach(qu=>{if(!S.qdone[qu.id]&&questReady(qu)){S.qdone[qu.id]=1;S.xp+=150;sess.questDone=qu.titre}});
  const t=today();S.days[t]=(S.days[t]||0)+1;
@@ -245,11 +246,11 @@ function renderQuiz(){
   if(!sess.revealed)h+='<textarea id="draft" class="draft" placeholder="Réponds dans ta tête ou écris ta réponse ici (facultatif)">'+esc(sess.draft)+'</textarea><button class="btn" onclick="reveal()">Voir la réponse attendue</button>';
   else{if(sess.draft.trim())h+='<div class="card"><b>Ta réponse</b><div class="sub" style="white-space:pre-wrap;margin-top:4px">'+esc(sess.draft)+'</div></div>';
    h+='<div class="card model"><b>Réponse attendue</b><div style="margin-top:6px">'+esc(q.a)+'</div>'+(q.pts.length?'<div class="sub small" style="margin-top:10px">Éléments à citer :</div><ul>'+q.pts.map(p=>'<li>'+esc(p)+'</li>').join("")+'</ul>':"")+'</div>';
-   if(!A)h+='<div class="sub small">As-tu donné tous ces éléments ?</div><div class="vf"><button class="ans" onclick="answer(true)">Oui, tout</button><button class="ans" onclick="answer(false)">Pas complètement</button></div>'}}
+   if(!A)h+='<div class="sub small">As-tu donné tous ces éléments ?</div><div class="vf3"><button class="ans" onclick="answer(true)">Oui, tout</button><button class="ans" onclick="answer(\'partiel\')">Pas complètement</button><button class="ans" onclick="answer(false)">Pas du tout</button></div>'}}
  else{h+='<input id="in" class="txt" '+(q.t==="nombre"?'inputmode="decimal" ':"")+'autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse" '+(A?'disabled value="'+esc(sess.given)+'"':"")+'>';
   if(!A)h+='<button class="btn" onclick="answer()">Valider</button>'}
  if(A){const ok=sess.okLast;
-  h+='<div class="fb '+(ok?"ok":"ko")+'"><b>'+(ok?"Bien joué ! +"+sess.gain+" XP":q.t==="ouverte"?"À retravailler":"Pas tout à fait. Réponse : "+esc(shown(q)))+'</b><span class="ex">'+esc(q.e||"")+'</span>'+
+  h+='<div class="fb '+(ok?"ok":"ko")+'"><b>'+(ok?"Bien joué ! +"+sess.gain+" XP":q.t==="ouverte"?(sess.given==="partiel"?"À compléter (+"+Math.floor(sess.gain/2)+" XP)":"À retravailler"):"Pas tout à fait. Réponse : "+esc(shown(q)))+'</b><span class="ex">'+esc(q.e||"")+'</span>'+
    (ok?"":'<div class="sub small" style="margin-top:6px">Elle reviendra '+(sess.mode==="exp"||sess.mode==="quest"?"en fin de session et ":"")+'dans tes rappels.</div>')+'</div>';
   if(sess.questDone){h+='<div class="fb ok"><b>Quête accomplie : '+esc(sess.questDone)+' ! +150 XP</b><span class="ex">Toutes les questions du contrôle vues, et '+QUEST_GOAL+' % maîtrisées.</span></div>';sess.questDone=null}
   if(sess.chest){h+='<div class="fb ok"><b>Coffre de la semaine ouvert : +100 XP !</b></div>';sess.chestShown=true;sess.chest=false}
