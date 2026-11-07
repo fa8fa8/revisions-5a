@@ -17,7 +17,8 @@
           "titre": "Trigonométrie",
           "fichier": "trigo.json"
         }
-      ]
+      ],
+      "exemple": true
     },
     {
       "id": "phys",
@@ -31,7 +32,8 @@
           "titre": "Mouvements (MRU / MRUA)",
           "fichier": "mvt.json"
         }
-      ]
+      ],
+      "exemple": true
     },
     {
       "id": "chim",
@@ -111,7 +113,8 @@
           "titre": "Figures de style et argumentation",
           "fichier": "style.json"
         }
-      ]
+      ],
+      "exemple": true
     },
     {
       "id": "en",
@@ -125,7 +128,8 @@
           "titre": "Tenses and conditionals",
           "fichier": "tenses.json"
         }
-      ]
+      ],
+      "exemple": true
     },
     {
       "id": "nl",
@@ -139,7 +143,8 @@
           "titre": "Grammatica: perfectum en woordorde",
           "fichier": "gram.json"
         }
-      ]
+      ],
+      "exemple": true
     },
     {
       "id": "hist",
@@ -153,7 +158,8 @@
           "titre": "L'ère des révolutions",
           "fichier": "revol.json"
         }
-      ]
+      ],
+      "exemple": true
     },
     {
       "id": "geo",
@@ -167,7 +173,8 @@
           "titre": "Cartes, climats et population",
           "fichier": "pop.json"
         }
-      ]
+      ],
+      "exemple": true
     }
   ]
 }

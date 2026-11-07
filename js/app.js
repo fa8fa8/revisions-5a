@@ -16,8 +16,12 @@ const EXAM_SIZE=20;     // questions en mode examen
 const LEVEL_SIZE=8;     // questions par niveau
 const PASS=70;          // % pour débloquer la suite
 const INT=[0,1,3,7,14,30,60]; // répétition espacée : jours avant le rappel, par boîte
-const RANKS=[[0,"Naufragé"],[150,"Explorateur"],[400,"Aventurier"],[800,"Pisteur"],[1500,"Cartographe"],[3000,"Légende de l'île"],[6000,"Gardien de l'île"]];
-const ITEMS=[[0,"🎒","Sac à dos"],[100,"🔦","Lampe torche"],[250,"🧭","Boussole"],[500,"🔭","Longue-vue"],[900,"⛺","Campement"],[1500,"🛶","Canoë"],[2500,"🗝️","Clé ancienne"],[4000,"⛵","Voilier"],[6000,"💎","Trésor de l'île"]];
+// Rangs : [XP, nom, niveau minimum exigé dans chaque matière réelle]
+const RANKS=[[0,"Naufragé",0],[100,"Survivant",0],[250,"Explorateur",0],[450,"Éclaireur",0],[700,"Aventurier",0],[1000,"Pisteur",0],[1400,"Grimpeur",0],[1900,"Navigateur",0],[2500,"Bâtisseur",1],[3300,"Cartographe",1],[4300,"Chasseur de trésors",2],[5500,"Capitaine",2],[7000,"Gardien du phare",3],[9000,"Sage du village",3],[11500,"Chef d'expédition",4],[14500,"Maître de l'île",4],[18000,"Héros de l'île",5],[22000,"Légende de l'île",6],[27000,"Mythe de l'île",7],[33000,"Gardien de l'île",8]];
+const ITEMS=[[0,"🎒","Sac à dos"],[250,"🔦","Lampe torche"],[700,"🧭","Boussole"],[1400,"🔭","Longue-vue"],[2500,"⛺","Campement"],[4300,"🛶","Canoë"],[7000,"🗝️","Clé ancienne"],[11500,"📜","Carte au trésor"],[18000,"⛵","Voilier"],[27000,"👑","Couronne"],[33000,"💎","Trésor de l'île"]];
+// Pondération des XP (anti-« farming »)
+const XP_SOON=0.3;              // question revue avant sa date de rappel
+const DAY_CAP=[[150,1],[300,0.5],[Infinity,0.2]]; // XP par matière et par jour -> multiplicateur
 const HERO='<svg viewBox="0 0 64 64" width="60" height="60" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#ffc85733"/><path d="M12 62 Q32 44 52 62Z" fill="#3e8e7e"/><circle cx="32" cy="36" r="13" fill="#f2c9a0"/><path d="M20 26 Q32 6 44 26Z" fill="#b07d45"/><ellipse cx="32" cy="26" rx="21" ry="5" fill="#8b5a2b"/><rect x="21" y="22" width="22" height="3" fill="#5c3a1a"/><circle cx="27" cy="37" r="1.8" fill="#222"/><circle cx="37" cy="37" r="1.8" fill="#222"/><path d="M27 43 Q32 47 37 43" stroke="#222" stroke-width="1.6" fill="none"/></svg>';
 
 /* ---------- état sauvegardé ---------- */
@@ -89,9 +93,17 @@ function startQuest(id,exam){const qu=QUESTS.find(x=>x.id===id),qs=questQs(qu);i
  begin({mode:exam?"qexam":"quest",questId:id,title:exam?"Contrôle blanc":"Quête",queue})}
 
 /* ---------- progression : rangs, objets, semaine ---------- */
-function rankOf(x){let n=RANKS[0][1];RANKS.forEach(r=>{if(x>=r[0])n=r[1]});return n}
-function rank(){let i=0;while(i+1<RANKS.length&&S.xp>=RANKS[i+1][0])i++;const cur=RANKS[i],nx=RANKS[i+1];
- return{name:cur[1],next:nx?nx[1]:null,pct:nx?Math.round((S.xp-cur[0])/(nx[0]-cur[0])*100):100,left:nx?nx[0]-S.xp:0}}
+const realCourses=()=>COURS.filter(c=>!c.exemple&&c.chapitres.some(ch=>isActive(ch)&&ch.q.length));
+function zoneMastery(c){const qs=c.chapitres.filter(ch=>isActive(ch)).flatMap(ch=>ch.q);return qs.length?qs.filter(q=>(S.srs[q.id]||[0])[0]>=3).length/qs.length:0}
+const zoneLevel=c=>Math.min(10,Math.floor(zoneMastery(c)*10));
+function minZone(){const rc=realCourses();if(!rc.length)return{lvl:0,c:null};let m=rc[0];rc.forEach(c=>{if(zoneLevel(c)<zoneLevel(m))m=c});return{lvl:zoneLevel(m),c:m}}
+function rankIdx(){const mz=minZone().lvl;let i=0;while(i+1<RANKS.length&&S.xp>=RANKS[i+1][0]&&mz>=RANKS[i+1][2])i++;i=Math.max(i,S.rankMax||0);if(i>(S.rankMax||0)){S.rankMax=i;save()}return i}
+function rank(){const i=rankIdx(),cur=RANKS[i],nx=RANKS[i+1];
+ const blocked=nx&&S.xp>=nx[0]?minZone():null;
+ return{name:cur[1],next:nx?nx[1]:null,pct:nx?Math.min(100,Math.round((S.xp-cur[0])/(nx[0]-cur[0])*100)):100,left:nx?Math.max(0,nx[0]-S.xp):0,blocked,need:nx?nx[2]:0}}
+function xpGain(base,q,wasSoon){const cid=QIDX[q.id].c.id,t=today();S.dayxp=S.dayxp||{};if(S.dayxp.d!==t)S.dayxp={d:t};const done=S.dayxp[cid]||0;
+ let m=1;for(const[lim,k] of DAY_CAP)if(done<lim){m=k;break}
+ const g=Math.max(1,Math.round(base*m*(wasSoon?XP_SOON:1)));S.dayxp[cid]=done+g;return{g,why:wasSoon?"déjà revue récemment":m<1?"beaucoup de "+QIDX[q.id].c.nom+" aujourd'hui":""}}
 function itemAt(x){let it=null;ITEMS.forEach(i=>{if(x>=i[0])it=i});return it}
 function weekInfo(){const t=today(),ws=weekStart(t),days=[];let n=0;
  for(let d=ws;d<ws+7;d++){const ok=(S.days[d]||0)>=DAY_MIN;if(ok)n++;days.push({ok,today:d===t,future:d>t})}
@@ -115,7 +127,7 @@ function renderHome(){
  const r=rank(),w=weekInfo(),due=dueIds().length,L="LMMJVSD";
  let h='<h1>L\'Île aux Révisions</h1><div class="sub">Explore l\'île, un cours par zone</div>';
  h+='<div class="hero">'+HERO+'<div style="flex:1"><div class="rank">'+esc(r.name)+' · '+S.xp+' XP</div><div class="xpbar"><i style="width:'+r.pct+'%"></i></div>'+
-  '<div class="sub small">'+(r.next?r.left+" XP avant le rang "+esc(r.next):"Rang maximum")+'</div>'+
+  '<div class="sub small">'+(r.next?(r.blocked?"Rang "+esc(r.next)+" : il faut le niveau "+r.need+" dans toutes les matières ("+esc(r.blocked.c?r.blocked.c.nom:"")+" : niveau "+r.blocked.lvl+")":r.left+" XP avant le rang "+esc(r.next)):"Rang maximum")+'</div>'+
   '<div class="inv">'+ITEMS.map(it=>'<span class="'+(S.xp>=it[0]?"":"lock")+'" title="'+esc(it[2])+(S.xp>=it[0]?"":" ("+it[0]+" XP)")+'">'+it[1]+'</span>').join("")+'</div></div></div>';
  h+='<div class="card week"><div class="row"><b>Cette semaine</b><span class="sub">'+Math.min(w.n,GOAL_WEEK)+' / '+GOAL_WEEK+' jours'+(w.chest?" · coffre ouvert":"")+'</span></div><div class="days">'+
   w.days.map((d,i)=>'<span class="d'+(d.ok?" ok":"")+(d.today?" now":"")+'">'+L[i]+'</span>').join("")+'</div>'+
@@ -128,7 +140,7 @@ function renderHome(){
  h+='<button class="btn hero-btn" onclick="startExpedition()">Expédition du jour<small>'+(due?due+" rappel"+(due>1?"s":"")+" prêt"+(due>1?"s":"")+" + nouvelles questions":"Nouvelles questions")+' · '+EXP_SIZE+' questions, arrêt possible à tout moment</small></button>';
  h+='<div class="grid">';
  COURS.forEach(c=>{const chs=c.chapitres.filter(ch=>ch.q.length),m=chs.length?Math.round(chs.reduce((s,ch)=>s+mastery(ch),0)/chs.length):0;
-  h+='<button class="pcard" style="--c:'+esc(c.couleur)+'" onclick="renderZone(\''+c.id+'\')"><div class="zone">'+esc(c.icone)+'</div><div class="pname">'+esc(c.zone)+'</div><div class="pmeta">'+esc(c.nom)+'<br>'+c.chapitres.length+' chapitre'+(c.chapitres.length>1?"s":"")+' · maîtrise '+m+' %</div></button>'});
+  h+='<button class="pcard" style="--c:'+esc(c.couleur)+'" onclick="renderZone(\''+c.id+'\')"><div class="zone">'+esc(c.icone)+'</div><div class="pname">'+esc(c.zone)+'</div><div class="pmeta">'+esc(c.nom)+'<br>'+c.chapitres.length+' chapitre'+(c.chapitres.length>1?"s":"")+' · '+(c.exemple?'exemple':'niveau '+zoneLevel(c)+' · maîtrise '+m+' %')+'</div></button>'});
  h+='</div><div class="tools"><button class="btn sec" onclick="renderExam()">Mode examen</button><button class="btn sec" onclick="renderSave()">Sauvegarde</button></div>';
  h+='<div class="note">Rien n\'est jamais bloqué : l\'entraînement libre reste ouvert sur tous les chapitres.</div>';
  go(h);
@@ -209,7 +221,7 @@ function inst(def){
   if(def.tol)g.tol=def.tol}
  g.id=def.id;return g;
 }
-function begin(o){sess=Object.assign({i:0,ok:0,done:0,xp:0,xp0:S.xp,again:new Set(),gain:10},o);show()}
+function begin(o){sess=Object.assign({i:0,ok:0,done:0,xp:0,xp0:S.xp,r0:rankIdx(),again:new Set(),gain:10},o);show()}
 function show(){
  if(sess.i>=sess.queue.length){if(sess.endless)sess.queue=sess.queue.concat(shuffle(sess.pool));else return finish()}
  sess.cur=inst(sess.queue[sess.i]);sess.answered=false;sess.given=null;sess.revealed=false;sess.draft="";renderQuiz();
@@ -242,10 +254,12 @@ function answer(g){
  const q=sess.cur;
  if(q.t==="texte"||q.t==="nombre"){const el=document.getElementById("in");g=el?el.value:"";if(!g.trim())return}
  sess.answered=true;sess.given=g;const ok=check(q,g);sess.okLast=ok;sess.done++;
+ const prev=S.srs[q.id],wasSoon=!!(prev&&prev[1]>today());
  srsUpdate(q.id,ok);
  S.streak[q.id]=ok?(S.streak[q.id]||0)+1:0;
- if(ok){sess.ok++;S.xp+=sess.gain;sess.xp+=sess.gain}
- else if(g==="partiel"){const h=Math.floor(sess.gain/2);S.xp+=h;sess.xp+=h}
+ sess.lastXP=null;
+ if(ok||g==="partiel"){const r=xpGain(ok?sess.gain:sess.gain/2,q,wasSoon);S.xp+=r.g;sess.xp+=r.g;sess.lastXP=r}
+ if(ok)sess.ok++;
  else if((sess.mode==="exp"||sess.mode==="quest")&&!sess.again.has(q.id)){sess.again.add(q.id);sess.queue.push(sess.queue[sess.i])}
  activeQuests().forEach(qu=>{if(!S.qdone[qu.id]&&questReady(qu)){S.qdone[qu.id]=1;S.xp+=150;sess.questDone=qu.titre}});
  const t=today();S.days[t]=(S.days[t]||0)+1;
@@ -271,7 +285,7 @@ function renderQuiz(){
  else{h+='<input id="in" class="txt" '+(q.t==="nombre"?'inputmode="decimal" ':"")+'autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse" '+(A?'disabled value="'+esc(sess.given)+'"':"")+'>';
   if(!A)h+='<button class="btn" onclick="answer()">Valider</button>'}
  if(A){const ok=sess.okLast;
-  h+='<div class="fb '+(ok?"ok":"ko")+'"><b>'+(ok?"Bien joué ! +"+sess.gain+" XP":q.t==="ouverte"?(sess.given==="partiel"?"À compléter (+"+Math.floor(sess.gain/2)+" XP)":"À retravailler"):"Pas tout à fait. Réponse : "+esc(shown(q)))+'</b><span class="ex">'+esc(q.e||"")+'</span>'+
+  h+='<div class="fb '+(ok?"ok":"ko")+'"><b>'+(ok?"Bien joué ! +"+sess.lastXP.g+" XP"+(sess.lastXP.why?' <span class="sub small">('+esc(sess.lastXP.why)+')</span>':""):q.t==="ouverte"?(sess.given==="partiel"?"À compléter (+"+sess.lastXP.g+" XP)":"À retravailler"):"Pas tout à fait. Réponse : "+esc(shown(q)))+'</b><span class="ex">'+esc(q.e||"")+'</span>'+
    (ok?"":'<div class="sub small" style="margin-top:6px">Elle reviendra '+(sess.mode==="exp"||sess.mode==="quest"?"en fin de session et ":"")+'dans tes rappels.</div>')+'</div>';
   if(sess.questDone){h+='<div class="fb ok"><b>Quête accomplie : '+esc(sess.questDone)+' ! +150 XP</b><span class="ex">Toutes les questions du contrôle vues, et '+QUEST_GOAL+' % maîtrisées.</span></div>';sess.questDone=null}
   if(sess.chest){h+='<div class="fb ok"><b>Coffre de la semaine ouvert : +100 XP !</b></div>';sess.chestShown=true;sess.chest=false}
@@ -310,7 +324,7 @@ function finish(){
  }
  const w=weekInfo();h+='<p class="sub">Semaine : '+Math.min(w.n,GOAL_WEEK)+' / '+GOAL_WEEK+' jours d\'exploration</p>';
  const ni=itemAt(S.xp),oi=itemAt(s.xp0);if(ni!==oi)h+='<div class="fb ok"><b>Nouvel objet : '+ni[1]+' '+esc(ni[2])+'</b></div>';
- if(rankOf(S.xp)!==rankOf(s.xp0))h+='<div class="fb ok"><b>Nouveau rang : '+esc(rankOf(S.xp))+'</b></div>';
+ {const ri=rankIdx();if(ri>s.r0)h+='<div class="fb ok"><b>Nouveau rang : '+esc(RANKS[ri][1])+'</b></div>'}
  h+='<button class="btn sec" onclick="back()">Retour</button></div>';
  sess=Object.assign({},s,{done:0});app.innerHTML=h;window.scrollTo(0,0);
 }
