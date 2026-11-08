@@ -60,6 +60,10 @@
      "10 questions du contrôle, d'abord celles jamais vues, puis les ratées. En enchaînant, toute la matière passe."
     ],
     [
+     "**Quête : prêtes**",
+     "une question est **prête** pour le contrôle quand tu l'as réussie **2 fois de suite**, même le même jour : idéal quand le contrôle est annoncé tard. La quête est accomplie quand toutes les questions ont été vues et 80 % sont prêtes."
+    ],
+    [
      "**Quête : Contrôle blanc**",
      "20 questions au hasard sur la matière du contrôle, note sur 20."
     ],
@@ -86,6 +90,10 @@
     [
      "**📄 Fiche récap**",
      "le résumé du chapitre."
+    ],
+    [
+     "**📚 Révisions d'examens**",
+     "quelques semaines avant les examens, **toutes** les questions reviennent, même celles déjà maîtrisées, jusqu'à ce que toute la matière soit revue."
     ]
    ],
    "n": "Rien n'est jamais bloqué : l'entraînement libre et les fiches restent toujours accessibles."

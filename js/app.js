@@ -34,7 +34,7 @@ try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(blank(),JSON.pars
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 /* ---------- contenu ---------- */
-let COURS=[],QUESTS=[];const QIDX={};
+let COURS=[],QUESTS=[],SESSIONS=[];const QIDX={};
 function hash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return(h>>>0).toString(36)}
 function makeLevels(qs){
  const sorted=qs.slice().sort((a,b)=>(a.n||1)-(b.n||1)),L=[];
@@ -45,7 +45,7 @@ function makeLevels(qs){
 async function load(){
  const idx=await fetch("data/cours.json",{cache:"no-cache"}).then(r=>r.json());
  COURS=idx.cours;
- QUESTS=await fetch("data/quetes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{quetes:[]}).then(d=>d.quetes||[]).catch(()=>[]);
+ {const qd=await fetch("data/quetes.json",{cache:"no-cache"}).then(r=>r.ok?r.json():{}).catch(()=>({}));QUESTS=qd.quetes||[];SESSIONS=qd.sessions||[]}
  await Promise.all(COURS.flatMap(c=>c.chapitres.map(ch=>
   fetch("data/"+c.id+"/"+ch.fichier,{cache:"no-cache"}).then(r=>{if(!r.ok)throw 0;return r.json()})
    .then(d=>{ch.q=d.questions||[];ch.fiche=d.fiche||null}).catch(()=>{ch.q=[];ch.err=true}))));
@@ -62,8 +62,14 @@ const isActive=ch=>!ch.vu||dayOf(ch.vu)<=today();
 const activeChaps=()=>COURS.flatMap(c=>c.chapitres.filter(ch=>isActive(ch)&&ch.q.length));
 
 /* ---------- répétition espacée ---------- */
-function srsUpdate(id,ok){const t=today(),cur=S.srs[id];if(ok&&cur&&cur[1]>t)return;let b=(cur||[0])[0];b=ok?Math.min(b+1,INT.length-1):0;S.srs[id]=[b,t+(ok?INT[b]:1)]}
-const dueIds=()=>{const t=today();return Object.keys(S.srs).filter(id=>QIDX[id]&&isActive(QIDX[id].ch)&&S.srs[id][1]<=t)};
+/* Session d'examens : pendant la période de révision, toute question dont le rappel tombe après l'examen redevient due */
+function examWin(){const t=today();for(const se of SESSIONS){const a=dayOf(se.debut),b=dayOf(se.date);if(t>=a&&t<=b)return Object.assign({},se,{start:a,end:b})}return null}
+const inSess=(w,m)=>!w.chapitres||w.chapitres.includes(m.c.id+"/"+m.ch.id)||w.chapitres.includes(m.c.id);
+function effDue(id,w){const d=S.srs[id][1];w=w===undefined?examWin():w;return w&&d>w.end&&QIDX[id]&&inSess(w,QIDX[id])?today():d}
+function srsUpdate(id,ok){const t=today(),cur=S.srs[id],w=examWin();if(ok&&cur&&effDue(id,w)>t)return;let b=(cur||[0])[0];b=ok?Math.min(b+1,INT.length-1):0;
+ let d=t+(ok?INT[b]:1);if(w&&QIDX[id]&&inSess(w,QIDX[id])&&d>w.end)d=Math.max(t+1,w.end-1);S.srs[id]=[b,d]}
+const dueIds=()=>{const t=today(),w=examWin();return Object.keys(S.srs).filter(id=>QIDX[id]&&isActive(QIDX[id].ch)&&effDue(id,w)<=t)};
+function sessLeft(w){return COURS.flatMap(c=>c.chapitres.filter(ch=>isActive(ch))).flatMap(ch=>ch.q).filter(q=>inSess(w,QIDX[q.id])&&(!S.srs[q.id]||effDue(q.id,w)<=today())).length}
 const mastery=ch=>ch.q.length?Math.round(ch.q.filter(q=>(S.srs[q.id]||[0])[0]>=3).length/ch.q.length*100):0;
 
 // Rappels classés par priorité : chapitres d'une quête proche, puis questions fragiles (boîte basse), puis les plus en retard
@@ -145,10 +151,13 @@ function renderHome(){
   (w.chest?"":'<div class="sub small">'+GOAL_WEEK+' jours d\'exploration ('+DAY_MIN+' réponses par jour) -> coffre de 100 XP</div>')+'</div>';
  activeQuests().forEach(qu=>{const m=questMastery(qu),n=questQs(qu).length,b=S.qbest[qu.id];
   h+='<div class="card quest"><div class="row"><b>⚔️ Quête : '+esc(qu.titre)+'</b></div><div class="sub small">'+esc(dateLabel(qu.date))+' ('+countdown(qu.days)+') · '+n+' questions</div>'+
-   '<div class="row small" style="margin-top:8px"><span>Vues : '+questSeen(qu)[0]+'/'+n+' · maîtrisées : '+m+' %'+(S.qdone[qu.id]?" ✓":"")+'</span>'+(b!==undefined?'<span>Contrôle blanc : '+b+'/20</span>':"")+'</div><div class="xpbar"><i style="width:'+m+'%"></i></div>'+
+   '<div class="row small" style="margin-top:8px"><span>Vues : '+questSeen(qu)[0]+'/'+n+' · prêtes : '+m+' %'+(S.qdone[qu.id]?" ✓":"")+'</span>'+(b!==undefined?'<span>Contrôle blanc : '+b+'/20</span>':"")+'</div><div class="xpbar"><i style="width:'+m+'%"></i></div>'+
+   '<div class="sub small" style="margin-top:4px">Prête = réussie 2 fois de suite, même le même jour.</div>'+
    '<div class="tools"><button class="btn" onclick="startQuest(\''+qu.id+'\',false)">S\'entraîner</button><button class="btn sec" onclick="startQuest(\''+qu.id+'\',true)">Contrôle blanc</button></div>'+
    qu.chapitres.map(k=>{const[cc,hh]=k.split("/"),co=course(cc),cp=co&&co.chapitres.find(x=>x.id===hh);return cp&&cp.fiche?'<button class="train fiche-btn" style="margin-top:8px" onclick="renderFiche(\''+cc+'\',\''+hh+'\',true)">📄 Fiche : '+esc(cp.titre)+'</button>':""}).join("")+'</div>'});
  {const lb=S.lastBackup,ago=lb!=null?today()-lb:null;if(S.xp>=50&&(lb==null||ago>=7))h+='<button class="card backup" onclick="renderSave()">💾 <b>Pense à sauvegarder</b><span class="sub small">'+(lb==null?"Aucune sauvegarde envoyée pour l\'instant":"Dernière sauvegarde il y a "+ago+" jours")+' : envoie-la hors de ton téléphone.</span></button>'}
+ {const w=examWin();if(w){const left=sessLeft(w),nd=w.end-today();
+  h+='<div class="card quest"><b>📚 '+esc(w.titre)+'</b><div class="sub small">'+esc(dateLabel(w.date))+' ('+countdown(nd)+')</div><div class="small" style="margin-top:8px">'+(left?left+" question"+(left>1?"s":"")+" à revoir, même celles déjà maîtrisées":"Toute la matière est revue ✓")+'</div><button class="btn" onclick="startExpedition(true)">Réviser ('+EXP_LONG+' questions)</button></div>'}}
  h+='<button class="btn hero-btn" onclick="startExpedition()">Expédition du jour<small>'+(due?due+" rappel"+(due>1?"s":"")+" prioritaire"+(due>1?"s":"")+" + nouvelles questions":"Nouvelles questions")+' · '+EXP_SIZE+' questions, arrêt possible à tout moment</small></button>'+(dueIds().length>prioDue()?'<button class="train" style="margin:-8px 0 16px" onclick="startExpedition(true)">Envie d\'en faire plus ? Expédition longue ('+EXP_LONG+' questions)</button>':'');
  h+='<div class="grid">';
  COURS.forEach(c=>{const chs=c.chapitres.filter(ch=>ch.q.length),m=chs.length?Math.round(chs.reduce((s,ch)=>s+mastery(ch),0)/chs.length):0;
@@ -333,7 +342,7 @@ function answer(g){
  const q=sess.cur;
  if(q.t==="texte"||q.t==="nombre"){const el=document.getElementById("in");g=el?el.value:"";if(!g.trim())return}
  sess.answered=true;sess.given=g;const ok=check(q,g);sess.okLast=ok;sess.done++;
- const prev=S.srs[q.id],wasSoon=!!(prev&&prev[1]>today());
+ const prev=S.srs[q.id],wasSoon=!!(prev&&effDue(q.id)>today())&&sess.mode!=="quest"&&sess.mode!=="qexam";
  srsUpdate(q.id,ok);
  S.streak[q.id]=ok?(S.streak[q.id]||0)+1:0;
  sess.lastXP=null;

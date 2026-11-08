@@ -8,5 +8,13 @@
         "bio/inne"
       ]
     }
+  ],
+  "sessions": [
+    {
+      "id": "examens-juin-2027",
+      "titre": "Examens de juin",
+      "debut": "2027-05-24",
+      "date": "2027-06-14"
+    }
   ]
 }

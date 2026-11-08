@@ -90,6 +90,20 @@ Pour un contrôle annoncé, ajouter une entrée dans `data/quetes.json` :
 - La quête est accomplie (+150 XP) quand toutes les questions ont été vues et que 80 % ont été réussies deux fois d'affilée.
 - Dans les 7 jours avant le contrôle, l'expédition du jour pioche en priorité dans ces chapitres.
 
+## Sessions d'examens
+
+Dans `data/quetes.json`, à côté de `quetes` :
+
+```json
+"sessions": [
+  { "id": "examens-juin-2027", "titre": "Examens de juin", "debut": "2027-05-24", "date": "2027-06-14" }
+]
+```
+
+- De `debut` à `date`, toute question dont le prochain rappel tombe **après** l'examen redevient à revoir, même maîtrisée. Une fois revue, elle est reprogrammée au plus tard la veille de l'examen.
+- `"chapitres": ["bio", "chim/liaisons"]` (facultatif) limite la session à certains cours ou chapitres.
+- Une carte « 📚 » apparaît sur l'accueil avec le nombre de questions encore à revoir.
+
 ## Niveaux
 
 Les niveaux sont calculés automatiquement : les questions d'un chapitre sont triées par difficulté puis découpées en niveaux de 8. Le Gardien (10 questions tirées dans tout le chapitre) s'ouvre quand tous les niveaux sont réussis à 70 %.
